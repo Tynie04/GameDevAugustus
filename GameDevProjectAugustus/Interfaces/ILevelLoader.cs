@@ -1,6 +1,7 @@
-﻿namespace GameDevProjectAugustus.Interfaces;
-
-public interface ILevelLoader
+﻿namespace GameDevProjectAugustus.Interfaces
 {
-    Level LoadLevel(string levelName);
+    public interface ILevelLoader
+    {
+        Level LoadLevel(string levelName);
+    }
 }

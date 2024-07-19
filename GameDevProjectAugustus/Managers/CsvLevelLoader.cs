@@ -14,11 +14,15 @@ public class CsvLevelLoader : ILevelLoader
 
     public Level LoadLevel(string levelName)
     {
-        var ground = LoadMap(Path.Combine(_basePath, $"{levelName}_ground.csv"));
-        var platforms = LoadMap(Path.Combine(_basePath, $"{levelName}_platforms.csv"));
-        var collisions = LoadMap(Path.Combine(_basePath, $"{levelName}_collisions.csv"));
-        
-        return new Level(ground, platforms, collisions);
+        var ground = LoadMap(Path.Combine(_basePath, levelName, $"{levelName}_ground.csv"));
+        var platforms = LoadMap(Path.Combine(_basePath, levelName, $"{levelName}_platforms.csv"));
+        var collisions = LoadMap(Path.Combine(_basePath, levelName, $"{levelName}_collisions.csv"));
+        var props = LoadMap(Path.Combine(_basePath, levelName, $"{levelName}_props.csv"));
+        var spawns = LoadMap(Path.Combine(_basePath, levelName, $"{levelName}_spawns.csv"));
+        var water = LoadMap(Path.Combine(_basePath, levelName, $"{levelName}_water.csv"));
+        var finish = LoadMap(Path.Combine(_basePath, levelName, $"{levelName}_finish.csv"));
+
+        return new Level(ground, platforms, collisions, props, spawns, water, finish);
     }
 
     private Dictionary<Vector2, int> LoadMap(string filePath)

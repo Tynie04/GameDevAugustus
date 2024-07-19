@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System.Collections.Generic;
@@ -20,17 +21,24 @@ public class Sprite : IPlayerController
     private float gravity = 0.15f;
     private float maxFallSpeed = 5f;
     private float jumpSpeed = -5f;
+    private int _tileSize; // Add this field to store tile size
 
-    public Sprite(IMovement movement, IPhysics physics, ICollisionManager collisionManager, Rectangle rect)
+    public Sprite(IMovement movement, IPhysics physics, ICollisionManager collisionManager, Rectangle rect, int tileSize)
     {
         _animations = new Dictionary<string, IAnimation>();
         _movement = movement;
         _physics = physics;
         _collisionManager = collisionManager;
         this.rect = rect;
+        this._tileSize = tileSize; // Initialize tile size
         velocity = Vector2.Zero;
         isGrounded = false;
         facingLeft = true; // Assuming the default direction is left
+    }
+
+    public void Initialize(Vector2 spawnPoint)
+    {
+        this.rect = new Rectangle((int)spawnPoint.X * _tileSize, (int)spawnPoint.Y * _tileSize, this.rect.Width, this.rect.Height);
     }
 
     public void AddAnimation(string name, IAnimation animation)
@@ -52,14 +60,7 @@ public class Sprite : IPlayerController
         velocity = _movement.UpdateMovement(velocity, keystate);
 
         // Determine the facing direction
-        if (velocity.X > 0)
-        {
-            facingLeft = false;
-        }
-        else if (velocity.X < 0)
-        {
-            facingLeft = true;
-        }
+        facingLeft = velocity.X < 0;
 
         // Handle jumping
         if (keystate.IsKeyDown(Keys.Space) && isGrounded)
@@ -99,3 +100,4 @@ public class Sprite : IPlayerController
         return rect;
     }
 }
+
