@@ -4,78 +4,64 @@ using Microsoft.Xna.Framework.Input;
 
 public class Sprite : IPlayerController
 {
-    private Texture2D texture;
+    private IAnimation _animation;
+    private IMovement _movement;
+    private IPhysics _physics;
+    private ICollisionManager _collisionManager;
+
     public Rectangle rect;
-    private Rectangle srect;
     public Vector2 velocity;
     public bool isGrounded;
 
     private float gravity = 0.15f;
-    private float jumpSpeed = -5f;
-    private float moveSpeed = 3f;
     private float maxFallSpeed = 5f;
-    
-    private ICollisionManager _collisionManager;
+    private float jumpSpeed = -5f; // Specific jump speed for the sprite
 
-
-    public Sprite(Texture2D texture, Rectangle rect, Rectangle srect)
+    public Sprite(IAnimation animation, IMovement movement, IPhysics physics, ICollisionManager collisionManager, Rectangle rect)
     {
-        this.texture = texture;
+        _animation = animation;
+        _movement = movement;
+        _physics = physics;
+        _collisionManager = collisionManager;
         this.rect = rect;
-        this.srect = srect;
         velocity = Vector2.Zero;
         isGrounded = false;
-        _collisionManager = new CollisionManager();
     }
 
     public void Update(GameTime gameTime, KeyboardState keystate, Level level, int tileSize)
     {
-        UpdateMovement(keystate);
-        ApplyPhysics();
-        HandleCollisions(level, tileSize);
-    }
+        // Update movement (horizontal only)
+        velocity = _movement.UpdateMovement(velocity, keystate);
 
-    private void UpdateMovement(KeyboardState keystate)
-    {
-        velocity.X = 0;
-
-        if (keystate.IsKeyDown(Keys.Right))
-        {
-            velocity.X = moveSpeed;
-        }
-        if (keystate.IsKeyDown(Keys.Left))
-        {
-            velocity.X = -moveSpeed;
-        }
-        if (keystate.IsKeyDown(Keys.Up) && isGrounded)
+        // Handle jumping
+        if (keystate.IsKeyDown(Keys.Space) && isGrounded)
         {
             velocity.Y = jumpSpeed;
-            isGrounded = false;
+            isGrounded = false; // Player is in the air now
         }
+
+        // Apply physics
+        velocity = _physics.ApplyPhysics(velocity, gravity, maxFallSpeed);
+
+        // Handle collisions
+        _collisionManager.HandleCollisions(this, level, tileSize);
+
+        // Update animation
+        _animation.Update(gameTime);
     }
 
-    private void ApplyPhysics()
+    public void Draw(SpriteBatch spriteBatch)
     {
-        velocity.Y += gravity;
-        if (velocity.Y > maxFallSpeed)
-        {
-            velocity.Y = maxFallSpeed;
-        }
+        _animation.Draw(spriteBatch, new Vector2(rect.X, rect.Y));
     }
-    
+
     public Rectangle GetRectangle()
     {
         return rect;
     }
 
-    private void HandleCollisions(Level level, int tileSize)
+    public void SetAnimation(IAnimation animation)
     {
-        // Assuming a collision manager is used to handle collisions
-        _collisionManager.HandleCollisions(this, level, tileSize);
-    }
-
-    public void Draw(SpriteBatch spriteBatch)
-    {
-        spriteBatch.Draw(texture, rect, srect, Color.White);
+        _animation = animation;
     }
 }

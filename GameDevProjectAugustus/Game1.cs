@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System.Collections.Generic;
 using GameDevProjectAugustus.Interfaces;
+using GameDevProjectAugustus.Managers;
 
 namespace GameDevProjectAugustus
 {
@@ -46,13 +47,22 @@ namespace GameDevProjectAugustus
             _rectangleTexture = new Texture2D(GraphicsDevice, 1, 1);
             _rectangleTexture.SetData(new Color[] { new Color(255, 0, 0, 255) });
 
-            _playerController = new Sprite(
-                Content.Load<Texture2D>("player_static"),
-                new Rectangle(16, 16, 16, 32),
-                new Rectangle(0, 0, 16, 32)
-            );
+            // Load hero texture
+            Texture2D heroTexture = Content.Load<Texture2D>("Mushroom");
 
+            // Create animations
+            Animation idleAnimation = AnimationFactory.CreateAnimationFromSingleLine(
+                heroTexture, frameWidth: 32, frameHeight: 32, startFrame: 0, frameCount: 4, frameTime: 0.2f);
+            Animation jumpAnimation = AnimationFactory.CreateAnimationFromSingleLine(
+                heroTexture, frameWidth: 32, frameHeight: 32, startFrame: 4, frameCount: 11, frameTime: 0.1f);
+
+            // Create movement, physics, and collision manager
+            IMovement movement = new StandardMovement(moveSpeed: 3f);
+            IPhysics physics = new StandardPhysics();
             _collisionManager = new CollisionManager();
+
+            // Create sprite with idle animation
+            _playerController = new Sprite(idleAnimation, movement, physics, _collisionManager, new Rectangle(16, 16, 32, 32));
         }
 
         protected override void Update(GameTime gameTime)
