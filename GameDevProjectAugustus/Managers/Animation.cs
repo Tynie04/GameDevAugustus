@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
+using GameDevProjectAugustus.Interfaces;
 
 public class Animation : IAnimation
 {
@@ -35,9 +36,9 @@ public class Animation : IAnimation
         }
     }
 
-    public void Draw(SpriteBatch spriteBatch, Vector2 position)
+    public void Draw(SpriteBatch spriteBatch, Vector2 position, SpriteEffects spriteEffects)
     {
         var sourceRectangle = _frames[_currentFrame].SourceRectangle;
-        spriteBatch.Draw(_texture, position, sourceRectangle, Color.White);
+        spriteBatch.Draw(_texture, position, sourceRectangle, Color.White, 0f, Vector2.Zero, 1f, spriteEffects, 0f);
     }
 }

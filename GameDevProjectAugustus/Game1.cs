@@ -38,32 +38,47 @@ namespace GameDevProjectAugustus
         }
 
         protected override void LoadContent()
-        {
-            _spriteBatch = new SpriteBatch(GraphicsDevice);
+{
+    _spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            _terrainTexture = Content.Load<Texture2D>("Terrain_and_Props");
-            _hitboxTexture = Content.Load<Texture2D>("hitbox");
+    _terrainTexture = Content.Load<Texture2D>("Terrain_and_Props");
+    _hitboxTexture = Content.Load<Texture2D>("hitbox");
 
-            _rectangleTexture = new Texture2D(GraphicsDevice, 1, 1);
-            _rectangleTexture.SetData(new Color[] { new Color(255, 0, 0, 255) });
+    _rectangleTexture = new Texture2D(GraphicsDevice, 1, 1);
+    _rectangleTexture.SetData(new Color[] { new Color(255, 0, 0, 255) });
 
-            // Load hero texture
-            Texture2D heroTexture = Content.Load<Texture2D>("Mushroom");
+    // Load hero texture
+    Texture2D heroTexture = Content.Load<Texture2D>("Mushroom");
 
-            // Create animations
-            Animation idleAnimation = AnimationFactory.CreateAnimationFromSingleLine(
-                heroTexture, frameWidth: 32, frameHeight: 32, startFrame: 0, frameCount: 4, frameTime: 0.2f);
-            Animation jumpAnimation = AnimationFactory.CreateAnimationFromSingleLine(
-                heroTexture, frameWidth: 32, frameHeight: 32, startFrame: 4, frameCount: 11, frameTime: 0.1f);
+    // Create animations
+    Animation idleAnimation = AnimationFactory.CreateAnimationFromSingleLine(
+        heroTexture, frameWidth: 32, frameHeight: 32, startFrame: 0, frameCount: 4, frameTime: 0.2f);
+    Animation jumpAnimation = AnimationFactory.CreateAnimationFromSingleLine(
+        heroTexture, frameWidth: 32, frameHeight: 32, startFrame: 4, frameCount: 11, frameTime: 0.1f);
+    Animation attackAnimation = AnimationFactory.CreateAnimationFromSingleLine(
+        heroTexture, frameWidth: 32, frameHeight: 32, startFrame: 15, frameCount: 5, frameTime: 0.1f);
+    Animation hurtAnimation = AnimationFactory.CreateAnimationFromSingleLine(
+        heroTexture, frameWidth: 32, frameHeight: 32, startFrame: 20, frameCount: 4, frameTime: 0.2f);
+    Animation deathAnimation = AnimationFactory.CreateAnimationFromSingleLine(
+        heroTexture, frameWidth: 32, frameHeight: 32, startFrame: 24, frameCount: 9, frameTime: 0.15f);
 
-            // Create movement, physics, and collision manager
-            IMovement movement = new StandardMovement(moveSpeed: 3f);
-            IPhysics physics = new StandardPhysics();
-            _collisionManager = new CollisionManager();
+    // Create movement, physics, and collision manager
+    IMovement movement = new StandardMovement(moveSpeed: 3f);
+    IPhysics physics = new StandardPhysics();
+    _collisionManager = new CollisionManager();
 
-            // Create sprite with idle animation
-            _playerController = new Sprite(idleAnimation, movement, physics, _collisionManager, new Rectangle(16, 16, 32, 32));
-        }
+    // Create sprite and add animations
+    var player = new Sprite(movement, physics, _collisionManager, new Rectangle(16, 16, 32, 32));
+    player.AddAnimation("Idle", idleAnimation);
+    player.AddAnimation("Jump", jumpAnimation);
+    player.AddAnimation("Attack", attackAnimation);
+    player.AddAnimation("Hurt", hurtAnimation);
+    player.AddAnimation("Death", deathAnimation);
+    player.PlayAnimation("Idle");
+
+    _playerController = player;
+}
+
 
         protected override void Update(GameTime gameTime)
         {
