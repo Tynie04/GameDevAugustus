@@ -32,20 +32,25 @@ public class CollisionManager : ICollisionManager
 
     private static void HandleLayerCollisions(Sprite sprite, Dictionary<Vector2, int> layer, int tileSize, bool horizontal)
     {
-        List<Rectangle> intersectingTiles = GetIntersectingTiles(sprite.rect, tileSize, layer);
-        foreach (Rectangle tile in intersectingTiles)
+        List<KeyValuePair<Rectangle, int>> intersectingTiles = GetIntersectingTiles(sprite.rect, tileSize, layer);
+        foreach (var tile in intersectingTiles)
         {
-            if (sprite.rect.Intersects(tile))
+            if (tile.Value == 3)
+            {
+                continue; // Skip the tile if its value is 3
+            }
+
+            if (sprite.rect.Intersects(tile.Key))
             {
                 if (horizontal)
                 {
                     if (sprite.velocity.X > 0) // Moving right
                     {
-                        sprite.rect.X = tile.Left - sprite.rect.Width;
+                        sprite.rect.X = tile.Key.Left - sprite.rect.Width;
                     }
                     else if (sprite.velocity.X < 0) // Moving left
                     {
-                        sprite.rect.X = tile.Right;
+                        sprite.rect.X = tile.Key.Right;
                     }
                     sprite.velocity.X = 0;
                 }
@@ -53,12 +58,12 @@ public class CollisionManager : ICollisionManager
                 {
                     if (sprite.velocity.Y > 0) // Moving down
                     {
-                        sprite.rect.Y = tile.Top - sprite.rect.Height;
+                        sprite.rect.Y = tile.Key.Top - sprite.rect.Height;
                         sprite.isGrounded = true;
                     }
                     else if (sprite.velocity.Y < 0) // Moving up
                     {
-                        sprite.rect.Y = tile.Bottom;
+                        sprite.rect.Y = tile.Key.Bottom;
                     }
                     sprite.velocity.Y = 0;
                 }
@@ -66,9 +71,9 @@ public class CollisionManager : ICollisionManager
         }
     }
 
-    private static List<Rectangle> GetIntersectingTiles(Rectangle target, int tileSize, Dictionary<Vector2, int> layer)
+    private static List<KeyValuePair<Rectangle, int>> GetIntersectingTiles(Rectangle target, int tileSize, Dictionary<Vector2, int> layer)
     {
-        List<Rectangle> intersectingTiles = new List<Rectangle>();
+        List<KeyValuePair<Rectangle, int>> intersectingTiles = new List<KeyValuePair<Rectangle, int>>();
         int leftTile = target.Left / tileSize;
         int rightTile = target.Right / tileSize;
         int topTile = target.Top / tileSize;
@@ -82,7 +87,8 @@ public class CollisionManager : ICollisionManager
                 if (layer.ContainsKey(tilePosition))
                 {
                     Rectangle tileRect = new Rectangle(x * tileSize, y * tileSize, tileSize, tileSize);
-                    intersectingTiles.Add(tileRect);
+                    int tileValue = layer[tilePosition];
+                    intersectingTiles.Add(new KeyValuePair<Rectangle, int>(tileRect, tileValue));
                 }
             }
         }
