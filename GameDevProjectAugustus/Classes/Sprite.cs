@@ -86,12 +86,12 @@ public class Sprite : IPlayerController
         _currentAnimation?.Update(gameTime);
     }
 
-    public void Draw(SpriteBatch spriteBatch)
+    public void Draw(SpriteBatch spriteBatch, Vector2 cameraPosition)
     {
         if (_currentAnimation != null)
         {
             SpriteEffects spriteEffects = facingLeft ? SpriteEffects.None : SpriteEffects.FlipHorizontally;
-            _currentAnimation.Draw(spriteBatch, new Vector2(rect.X, rect.Y), spriteEffects);
+            _currentAnimation.Draw(spriteBatch, new Vector2(rect.X - cameraPosition.X, rect.Y - cameraPosition.Y), spriteEffects);
         }
     }
 

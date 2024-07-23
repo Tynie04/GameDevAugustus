@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Xna.Framework;
 
 public class Level
@@ -10,6 +11,8 @@ public class Level
     public Dictionary<Vector2, int> Spawns { get; }
     public Dictionary<Vector2, int> Water { get; }
     public Dictionary<Vector2, int> Finish { get; }
+    public int Width { get; }
+    public int Height { get; }
 
     public Level(
         Dictionary<Vector2, int> ground,
@@ -27,6 +30,10 @@ public class Level
         Spawns = spawns;
         Water = water;
         Finish = finish;
+
+        // Calculate level width and height based on the largest X and Y values in the ground tiles
+        Width = (int)(Ground.Keys.Max(v => v.X) + 1);
+        Height = (int)(Ground.Keys.Max(v => v.Y) + 1);
     }
 }
 

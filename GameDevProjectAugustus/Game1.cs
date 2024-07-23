@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using GameDevProjectAugustus.Interfaces;
 using GameDevProjectAugustus.Managers;
 using Microsoft.Xna.Framework;
@@ -113,6 +114,8 @@ public class Game1 : Game
         KeyboardState keystate = Keyboard.GetState();
         _playerController.Update(gameTime, keystate, _currentLevel, _tileSize);
 
+        UpdateCamera(); // Update camera position
+
         base.Update(gameTime);
     }
 
@@ -131,12 +134,26 @@ public class Game1 : Game
         DrawTiles(_currentLevel.Finish, _finishTexture);
         DrawTiles(_currentLevel.Props, _propsTexture);
 
-        _playerController.Draw(_spriteBatch);
+        _playerController.Draw(_spriteBatch, _camera); // Pass camera position
         DrawRectHollow(_spriteBatch, _playerController.GetRectangle(), 4);
 
         _spriteBatch.End();
 
         base.Draw(gameTime);
+    }
+
+    private void UpdateCamera()
+    {
+        Rectangle playerRect = _playerController.GetRectangle();
+
+        _camera.X = playerRect.Center.X - (_graphics.PreferredBackBufferWidth / 2);
+        _camera.Y = playerRect.Center.Y - (_graphics.PreferredBackBufferHeight / 2);
+
+        // Clamp the camera position to the level bounds
+        _camera.X = Math.Max(0, _camera.X);
+        _camera.Y = Math.Max(0, _camera.Y);
+        _camera.X = Math.Min(_currentLevel.Width * _tileSize - _graphics.PreferredBackBufferWidth, _camera.X);
+        _camera.Y = Math.Min(_currentLevel.Height * _tileSize - _graphics.PreferredBackBufferHeight, _camera.Y);
     }
 
     private void DrawTiles(Dictionary<Vector2, int> tiles, Texture2D texture)
@@ -149,8 +166,8 @@ public class Game1 : Game
             int tileValue = kvp.Value;
 
             Rectangle destinationRect = new Rectangle(
-                (int)position.X * displayTileSize + (int)_camera.X,
-                (int)position.Y * displayTileSize + (int)_camera.Y,
+                (int)(position.X * displayTileSize - _camera.X),
+                (int)(position.Y * displayTileSize - _camera.Y),
                 displayTileSize,
                 displayTileSize
             );
@@ -171,8 +188,8 @@ public class Game1 : Game
         spriteBatch.Draw(
             _rectangleTexture,
             new Rectangle(
-                rect.X,
-                rect.Y,
+                rect.X - (int)_camera.X,
+                rect.Y - (int)_camera.Y,
                 rect.Width,
                 thickness
             ),
@@ -181,8 +198,8 @@ public class Game1 : Game
         spriteBatch.Draw(
             _rectangleTexture,
             new Rectangle(
-                rect.X,
-                rect.Bottom - thickness,
+                rect.X - (int)_camera.X,
+                rect.Bottom - thickness - (int)_camera.Y,
                 rect.Width,
                 thickness
             ),
@@ -191,8 +208,8 @@ public class Game1 : Game
         spriteBatch.Draw(
             _rectangleTexture,
             new Rectangle(
-                rect.X,
-                rect.Y,
+                rect.X - (int)_camera.X,
+                rect.Y - (int)_camera.Y,
                 thickness,
                 rect.Height
             ),
@@ -201,8 +218,8 @@ public class Game1 : Game
         spriteBatch.Draw(
             _rectangleTexture,
             new Rectangle(
-                rect.Right - thickness,
-                rect.Y,
+                rect.Right - thickness - (int)_camera.X,
+                rect.Y - (int)_camera.Y,
                 thickness,
                 rect.Height
             ),
