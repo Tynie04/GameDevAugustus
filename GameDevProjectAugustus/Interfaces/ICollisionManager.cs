@@ -1,4 +1,4 @@
-﻿using GameDevProjectAugustus;
+﻿namespace GameDevProjectAugustus.Interfaces;
 
 public interface ICollisionManager
 {

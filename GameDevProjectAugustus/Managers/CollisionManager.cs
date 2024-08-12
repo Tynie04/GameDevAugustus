@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using GameDevProjectAugustus.Interfaces;
 using Microsoft.Xna.Framework;
 
 public class CollisionManager : ICollisionManager
