@@ -1,17 +1,19 @@
 ﻿using System;
-using System.Collections.Generic;
 using GameDevProjectAugustus.Interfaces;
 using GameDevProjectAugustus.Managers;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using System.Collections.Generic;
+using GameDevProjectAugustus.Enums;
 
-namespace GameDevProjectAugustus;
-
-public class Game1 : Game
+namespace GameDevProjectAugustus
+{
+    public class Game1 : Game
 {
     private GraphicsDeviceManager _graphics;
     private SpriteBatch _spriteBatch;
+    private SpriteFont _font;
 
     private ILevelLoader _levelLoader;
     private Level _currentLevel;
@@ -21,12 +23,12 @@ public class Game1 : Game
     private Texture2D _spawnsTexture;
     private Texture2D _waterTexture;
     private Texture2D _finishTexture;
-
+    private Texture2D _rectangleTexture;
+    
     private Vector2 _camera;
-    private IPlayerController _playerController;
+    public IPlayerController _playerController;
     private ICollisionManager _collisionManager;
     private int _tileSize = 16; // Make sure this matches your CSV data
-    private Texture2D _rectangleTexture;
 
     private string _currentLevelName = "level1";
 
@@ -35,6 +37,7 @@ public class Game1 : Game
         _graphics = new GraphicsDeviceManager(this);
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
+
         _levelLoader = new CsvLevelLoader("../../../Data");
         _camera = Vector2.Zero;
     }
@@ -42,6 +45,10 @@ public class Game1 : Game
     protected override void LoadContent()
     {
         _spriteBatch = new SpriteBatch(GraphicsDevice);
+        _font = Content.Load<SpriteFont>("DefaultFont"); // Load the default font
+
+        // Initialize GameStateManager and pass it to the constructor
+        GameStateManager.Instance.Initialize(this, _graphics, _font);
 
         // Load textures for each tileset
         _terrainTexture = Content.Load<Texture2D>("Terrain_and_Props");
@@ -50,6 +57,8 @@ public class Game1 : Game
         _spawnsTexture = Content.Load<Texture2D>("Spawns");
         _waterTexture = Content.Load<Texture2D>("Terrain_and_Props");
         _finishTexture = Content.Load<Texture2D>("Stairs");
+        
+        _font = Content.Load<SpriteFont>("DefaultFont"); // Ensure this line is present and correct
 
         _rectangleTexture = new Texture2D(GraphicsDevice, 1, 1);
         _rectangleTexture.SetData(new Color[] { new Color(255, 0, 0, 255) });
@@ -73,7 +82,7 @@ public class Game1 : Game
             heroTexture, frameWidth: 32, frameHeight: 32, startFrame: 24, frameCount: 9, frameTime: 0.15f);
 
         // Create movement, physics, and collision manager
-        IMovement movement = new StandardMovement(moveSpeed: 3f);
+        IMovement movement = new StandardMovement(moveSpeed: 2f);
         IPhysics physics = new StandardPhysics();
         _collisionManager = new CollisionManager();
 
@@ -93,9 +102,12 @@ public class Game1 : Game
         player.PlayAnimation("Idle");
 
         _playerController = player;
+
+        // Set the game state to Start
+        GameStateManager.Instance.ChangeState(GameState.Start);
     }
 
-    private Vector2 FindSpawnPosition(int id)
+    public Vector2 FindSpawnPosition(int id)
     {
         foreach (var kvp in _currentLevel.Spawns)
         {
@@ -107,7 +119,7 @@ public class Game1 : Game
         return Vector2.Zero; // Default spawn position if not found
     }
 
-    private void LoadLevel(string levelName)
+    public void LoadLevel(string levelName)
     {
         _currentLevel = _levelLoader.LoadLevel(levelName);
         _currentLevelName = levelName;
@@ -117,20 +129,40 @@ public class Game1 : Game
     {
         if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed ||
             Keyboard.GetState().IsKeyDown(Keys.Escape))
+        {
             Exit();
+        }
 
-        KeyboardState keystate = Keyboard.GetState();
-        _playerController.Update(gameTime, keystate, _currentLevel, _tileSize);
+        // Update the game state manager
+        GameStateManager.Instance.Update(gameTime);
 
-        CheckForLevelTransition();
+        // Check if the player is in the Playing state
+        if (GameStateManager.Instance.CurrentState == GameState.Playing)
+        {
+            KeyboardState keystate = Keyboard.GetState();
+        
+            // Debug: Check if key press is detected
+            if (keystate.IsKeyDown(Keys.D9))
+            {
+                Console.WriteLine("Game Over triggered by pressing 9");
+                GameStateManager.Instance.ChangeState(GameState.GameOver);
+                return; // Skip further updates to immediately show the game over screen
+            }
 
-        UpdateCamera(); // Update camera position
+            _playerController.Update(gameTime, keystate, _currentLevel, _tileSize);
+
+            CheckForLevelTransition();
+
+            UpdateCamera(); // Update camera position
+        }
 
         base.Update(gameTime);
     }
 
     private void CheckForLevelTransition()
     {
+        if (GameStateManager.Instance.CurrentState != GameState.Playing) return;
+
         Rectangle playerRect = _playerController.GetRectangle();
         Vector2 playerTile = new Vector2(
             (int)(playerRect.Center.X / _tileSize),
@@ -139,9 +171,18 @@ public class Game1 : Game
 
         if (_currentLevel.Spawns.TryGetValue(playerTile, out int spawnId) && spawnId == 0)
         {
-            LoadNextLevel();
+            if (_currentLevelName == "level2")
+            {
+                // Trigger the finish screen when on the last level
+                GameStateManager.Instance.ChangeState(GameState.Finish);
+            }
+            else
+            {
+                LoadNextLevel();
+            }
         }
     }
+
 
     private void LoadNextLevel()
     {
@@ -160,25 +201,40 @@ public class Game1 : Game
 
         _spriteBatch.Begin(samplerState: SamplerState.PointClamp);
 
-        // Draw layers in the specified order
-        DrawTiles(_currentLevel.Spawns, _spawnsTexture);
-        DrawTiles(_currentLevel.Collisions, _hitboxTexture);
-        DrawTiles(_currentLevel.Ground, _terrainTexture);
-        DrawTiles(_currentLevel.Water, _waterTexture);
-        DrawTiles(_currentLevel.Platforms, _terrainTexture);
-        DrawTiles(_currentLevel.Finish, _finishTexture);
-        DrawTiles(_currentLevel.Props, _propsTexture);
-
-        _playerController.Draw(_spriteBatch, _camera); // Pass camera position
-
-        // Uncomment to draw player hitbox. For debugging purposes
-        // DrawRectHollow(_spriteBatch, _playerController.GetRectangle(), 4);
+        // Let the GameStateManager handle the draw calls
+        GameStateManager.Instance.Draw(_spriteBatch);
 
         _spriteBatch.End();
 
         base.Draw(gameTime);
     }
+    
+    public void DrawGame(SpriteBatch spriteBatch)
+    {
+        // Here, draw the main game content: levels, player, etc.
+        DrawTiles(_currentLevel.Ground, _terrainTexture);
+        DrawTiles(_currentLevel.Platforms, _terrainTexture);
+        //DrawTiles(_currentLevel.Collisions, _hitboxTexture);
+        DrawTiles(_currentLevel.Spawns, _spawnsTexture);
+        DrawTiles(_currentLevel.Water, _waterTexture);
+        //DrawTiles(_currentLevel.Finish, _finishTexture);
+        DrawTiles(_currentLevel.Props, _propsTexture);
+        
+        // Draw the player character
+        _playerController.Draw(spriteBatch, _camera);
 
+        // If needed, draw the player collision rectangle for debugging
+        DrawRectHollow(spriteBatch, _playerController.GetRectangle(), 2);
+    }
+    
+    public void UpdateGame(GameTime gameTime)
+    {
+        // Handle game update logic during the Playing state
+        KeyboardState keystate = Keyboard.GetState();
+        _playerController.Update(gameTime, keystate, _currentLevel, _tileSize);
+        CheckForLevelTransition();
+        UpdateCamera();
+    }
     private void UpdateCamera()
     {
         Rectangle playerRect = _playerController.GetRectangle();
@@ -263,4 +319,6 @@ public class Game1 : Game
             Color.White
         );
     }
+}
+
 }
