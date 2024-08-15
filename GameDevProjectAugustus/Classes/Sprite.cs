@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using GameDevProjectAugustus.Classes;
 using GameDevProjectAugustus.Interfaces;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-
-namespace GameDevProjectAugustus.Classes;
 
 public class Sprite : IPlayerController
 {
@@ -19,6 +18,7 @@ public class Sprite : IPlayerController
     public Rectangle Rect;
     public Vector2 Velocity;
     public bool IsGrounded;
+    public bool IsInWater; // Track if the sprite is in water
     private bool _facingLeft;
 
     private readonly float _gravity = 0.15f;
@@ -31,10 +31,13 @@ public class Sprite : IPlayerController
     private bool _isDeathAnimationComplete; // Track death animation completion
     private bool _playHurtAnimation;
     
+    private float _waterDamageTimer; // Timer to track time in water
+    private const float WaterDamageInterval = 1.5f; // Damage interval in seconds
+    private const int WaterDamageAmount = 2; // Damage per second
+
     public bool IsAlive => _health.IsAlive;
     public int CurrentHealth => _health.CurrentHealth;
     public int MaxHealth => _health.MaxHealth;
-
 
     public event EventHandler OnDeath;
 
@@ -49,6 +52,7 @@ public class Sprite : IPlayerController
         _tileSize = tileSize;
         Velocity = Vector2.Zero;
         IsGrounded = false;
+        IsInWater = false; // Initialize water state
         _facingLeft = true;
     }
 
@@ -100,6 +104,21 @@ public class Sprite : IPlayerController
         // Handle collisions
         _collisionManager.HandleCollisions(this, level, tileSize);
 
+        // Apply water damage if in water
+        if (IsInWater)
+        {
+            _waterDamageTimer -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+            if (_waterDamageTimer >= 0)
+            {
+                TakeDamage(WaterDamageAmount);
+                _waterDamageTimer = WaterDamageInterval; // Reset the timer for continuous damage
+            }
+        }
+        else
+        {
+            _waterDamageTimer = 0; // Reset water damage timer if out of water
+        }
+
         // Switch back to idle animation if grounded
         if (IsGrounded && Velocity.Y == 0 && !_isFlickering)
         {
@@ -117,7 +136,15 @@ public class Sprite : IPlayerController
         }
     }
 
-
+    public void ApplyWaterDamage()
+    {
+        // Start the water damage timer if it is not already active
+        if (_waterDamageTimer <= 0)
+        {
+            _waterDamageTimer = WaterDamageInterval;
+        }
+    }
+   
     public void Draw(SpriteBatch spriteBatch, Vector2 cameraPosition)
     {
         if (_isFlickering)
@@ -132,7 +159,6 @@ public class Sprite : IPlayerController
             _currentAnimation.Draw(spriteBatch, new Vector2(Rect.X - cameraPosition.X, Rect.Y - cameraPosition.Y), spriteEffects);
         }
     }
-
 
     public Rectangle GetRectangle()
     {
@@ -170,6 +196,7 @@ public class Sprite : IPlayerController
         }
     }
 
+
     public void Heal(int amount)
     {
         _health.Heal(amount);
@@ -186,5 +213,6 @@ public class Sprite : IPlayerController
         _invulnerabilityTimer = 0f;
         _isFlickering = false;
         _isDeathAnimationComplete = false;
+        //_waterDamageTimer = 0f; // Reset water damage timer
     }
 }

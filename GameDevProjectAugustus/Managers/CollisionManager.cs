@@ -1,11 +1,14 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using GameDevProjectAugustus.Classes;
 using GameDevProjectAugustus.Interfaces;
 using Microsoft.Xna.Framework;
 
+namespace GameDevProjectAugustus.Managers;
+
 public class CollisionManager : ICollisionManager
 {
-   private static void HandleHorizontalCollisions(Sprite sprite, Level level, int tileSize)
+    private static void HandleHorizontalCollisions(Sprite sprite, Level level, int tileSize)
     {
         // Check collisions with ground, platforms, and any other layer you want to collide with
         HandleLayerCollisions(sprite, level.Collisions, tileSize, horizontal: true);
@@ -33,21 +36,26 @@ public class CollisionManager : ICollisionManager
     }
 
 
-private static void HandleLayerCollisions(Sprite sprite, Dictionary<Vector2, int> layer, int tileSize, bool horizontal)
-{
-    List<KeyValuePair<Rectangle, int>> intersectingTiles = GetIntersectingTiles(sprite.Rect, tileSize, layer);
-    foreach (var tile in intersectingTiles)
+    private static void HandleLayerCollisions(Sprite sprite, Dictionary<Vector2, int> layer, int tileSize, bool horizontal)
     {
-        if (tile.Value == 3)
-        {
-            continue; // Skip the tile if its value is 3
-        }
+        List<KeyValuePair<Rectangle, int>> intersectingTiles = GetIntersectingTiles(sprite.Rect, tileSize, layer);
+        bool isInWater = false; // Flag to track if the player is in water
 
-        if (sprite.Rect.Intersects(tile.Key))
+        foreach (var tile in intersectingTiles)
         {
-           
-                if (tile.Value == 4)
-                    continue;
+            if (tile.Value == 3)
+            {
+                continue; // Skip the tile if its value is 3
+            }
+
+            if (sprite.Rect.Intersects(tile.Key))
+            {
+                // Check if the tile is water (ID 1)
+                if (tile.Value == 1)
+                {
+                    isInWater = true; // Player is in water
+                    Console.WriteLine("Sprite is in water.");
+                }
 
                 if (horizontal)
                 {
@@ -66,7 +74,7 @@ private static void HandleLayerCollisions(Sprite sprite, Dictionary<Vector2, int
                     if (sprite.Velocity.Y > 0) // Moving down
                     {
                         sprite.Rect.Y = tile.Key.Top - sprite.Rect.Height;
-                        sprite.IsGrounded = true;
+                        sprite.IsGrounded = true; // Default to true
                     }
                     else if (sprite.Velocity.Y < 0) // Moving up
                     {
@@ -74,10 +82,20 @@ private static void HandleLayerCollisions(Sprite sprite, Dictionary<Vector2, int
                     }
                     sprite.Velocity.Y = 0;
                 }
+            }
+        }
+
+        // Handle water damage if the player is in water
+        if (isInWater)
+        {
+            sprite.IsInWater = true; // Set the sprite to be in water
+            sprite.ApplyWaterDamage(); // Apply water damage
+        }
+        else
+        {
+            sprite.IsInWater = false; // Reset water state if not in water
         }
     }
-}
-
 
     private static List<KeyValuePair<Rectangle, int>> GetIntersectingTiles(Rectangle target, int tileSize, Dictionary<Vector2, int> layer)
     {
