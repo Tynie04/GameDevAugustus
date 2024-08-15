@@ -11,9 +11,13 @@ namespace GameDevProjectAugustus.Interfaces
         Rectangle GetRectangle();
         void Initialize(Vector2 position);
 
-        // New properties and methods for health management
+        // Health management
         bool IsAlive { get; }
         void TakeDamage(int amount);
         void Heal(int amount);
+
+        // To access health-related data
+        int CurrentHealth { get; }
+        int MaxHealth { get; }
     }
 }

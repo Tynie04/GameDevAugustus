@@ -9,6 +9,7 @@ namespace GameDevProjectAugustus.Classes
 
         public int CurrentHealth => _currentHealth;
         public bool IsAlive => _currentHealth > 0;
+        public int MaxHealth => _maxHealth;
 
         public Health(int maxHealth)
         {

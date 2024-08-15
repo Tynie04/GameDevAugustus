@@ -19,7 +19,6 @@ public class Sprite : IPlayerController
     public Vector2 Velocity;
     public bool IsGrounded;
     private bool _facingLeft;
-    public bool IsAlive => _health.IsAlive;
 
     private readonly float _gravity = 0.15f;
     private readonly float _maxFallSpeed = 5f;
@@ -30,6 +29,10 @@ public class Sprite : IPlayerController
     private bool _isFlickering; // Flag for flickering
     private bool _isDeathAnimationComplete; // Track death animation completion
     private bool _playHurtAnimation;
+    
+    public bool IsAlive => _health.IsAlive;
+    public int CurrentHealth => _health.CurrentHealth;
+    public int MaxHealth => _health.MaxHealth;
 
     public event EventHandler OnDeath;
 
@@ -168,7 +171,7 @@ public class Sprite : IPlayerController
     {
         if (this._health is Health health)
         {
-            health.Heal(3);
+            health.Heal(5);
         }
 
         // Reset flickering state and invulnerability timer when starting a new game
