@@ -235,11 +235,11 @@
         public void DrawGame(SpriteBatch spriteBatch)
         {
             // Draw the level and player
+            DrawTiles(_currentLevel.Water, _waterTexture);
+            DrawTiles(_currentLevel.Props, _propsTexture);
             DrawTiles(_currentLevel.Ground, _terrainTexture);
             DrawTiles(_currentLevel.Platforms, _terrainTexture);
             DrawTiles(_currentLevel.Spawns, _spawnsTexture);
-            DrawTiles(_currentLevel.Water, _waterTexture);
-            DrawTiles(_currentLevel.Props, _propsTexture);
             _playerController.Draw(spriteBatch, _camera);
 
             // Draw health hearts
