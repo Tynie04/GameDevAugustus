@@ -27,8 +27,6 @@ public class GameOverScreen : IScreen
     public void Draw(SpriteBatch spriteBatch)
     {
         _graphics.GraphicsDevice.Clear(Color.Red);
-        spriteBatch.Begin();
         spriteBatch.DrawString(_font, "Game Over. Press Enter to Return to Start", new Vector2(100, 100), Color.White);
-        spriteBatch.End();
     }
 }

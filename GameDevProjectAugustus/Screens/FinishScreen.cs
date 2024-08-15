@@ -29,8 +29,8 @@ public class FinishScreen : IScreen
     public void Draw(SpriteBatch spriteBatch)
     {
         _graphics.GraphicsDevice.Clear(Color.Green);
-        spriteBatch.DrawString(_font, "Congratulations! Press Enter to Return to Start", new Vector2(100, 100), Color.White);
-        
-        
+        spriteBatch.DrawString(_font, "Congratulations! You finished all the levels", new Vector2(100, 100), Color.White);
+        spriteBatch.DrawString(_font, "Press Enter to Return to level 1", new Vector2(100, 150), Color.White);
+        spriteBatch.DrawString(_font, "Press Escape to Exit", new Vector2(100, 200), Color.White);
     }
 }

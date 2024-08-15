@@ -12,8 +12,20 @@ public class Animation : IAnimation
     private double _timer;
     private bool _isLooping;
 
-    public Animation(Texture2D texture, List<AnimationFrame> frames, double frameTime, bool isLooping = true)
+    // Additional properties
+    public string Name { get; private set; } // Property to hold the animation name
+    public bool IsComplete 
+    { 
+        get 
+        {
+            // Animation is complete if it has finished all frames and is not looping
+            return !_isLooping && _currentFrame >= _frames.Count - 1;
+        }
+    }
+
+    public Animation(string name, Texture2D texture, List<AnimationFrame> frames, double frameTime, bool isLooping = true)
     {
+        Name = name; // Set the name of the animation
         _texture = texture;
         _frames = frames;
         _frameTime = frameTime;
@@ -31,7 +43,14 @@ public class Animation : IAnimation
             _currentFrame++;
             if (_currentFrame >= _frames.Count)
             {
-                _currentFrame = _isLooping ? 0 : _frames.Count - 1;
+                if (_isLooping)
+                {
+                    _currentFrame = 0; // Loop back to the first frame
+                }
+                else
+                {
+                    _currentFrame = _frames.Count - 1; // Stay at the last frame
+                }
             }
         }
     }
@@ -41,4 +60,5 @@ public class Animation : IAnimation
         var sourceRectangle = _frames[_currentFrame].SourceRectangle;
         spriteBatch.Draw(_texture, position, sourceRectangle, Color.White, 0f, Vector2.Zero, 1f, spriteEffects, 0f);
     }
+    
 }

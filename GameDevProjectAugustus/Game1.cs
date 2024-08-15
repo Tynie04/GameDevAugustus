@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System.Collections.Generic;
+using GameDevProjectAugustus.Classes;
 using GameDevProjectAugustus.Enums;
 
 namespace GameDevProjectAugustus
@@ -29,6 +30,9 @@ namespace GameDevProjectAugustus
     public IPlayerController _playerController;
     private ICollisionManager _collisionManager;
     private int _tileSize = 16; // Make sure this matches your CSV data
+    
+    private float _damageCooldown = 0.5f; // seconds
+    private float _damageCooldownTimer = 0f;
 
     private string _currentLevelName = "level1";
 
@@ -77,7 +81,7 @@ namespace GameDevProjectAugustus
         Animation attackAnimation = AnimationFactory.CreateAnimationFromSingleLine(
             heroTexture, frameWidth: 32, frameHeight: 32, startFrame: 15, frameCount: 5, frameTime: 0.1f);
         Animation hurtAnimation = AnimationFactory.CreateAnimationFromSingleLine(
-            heroTexture, frameWidth: 32, frameHeight: 32, startFrame: 20, frameCount: 4, frameTime: 0.2f);
+            heroTexture, frameWidth: 32, frameHeight: 32, startFrame: 20, frameCount: 4, frameTime: 0.25f);
         Animation deathAnimation = AnimationFactory.CreateAnimationFromSingleLine(
             heroTexture, frameWidth: 32, frameHeight: 32, startFrame: 24, frameCount: 9, frameTime: 0.15f);
 
@@ -88,7 +92,8 @@ namespace GameDevProjectAugustus
 
         // Create sprite and add animations
         var playerRect = new Rectangle(16, 16, 32, 32); // Default size for the player
-        var player = new Sprite(movement, physics, _collisionManager, playerRect, _tileSize);
+        IHealth playerHealth = new Health(maxHealth: 3);
+        var player = new Sprite(movement, physics, _collisionManager, playerHealth, playerRect, _tileSize);
 
         // Initialize player at spawn point
         Vector2 spawnPosition = FindSpawnPosition(2); // Find spawn position with ID 2
@@ -102,9 +107,16 @@ namespace GameDevProjectAugustus
         player.PlayAnimation("Idle");
 
         _playerController = player;
+        player.OnDeath += Player_OnDeath;
+
 
         // Set the game state to Start
         GameStateManager.Instance.ChangeState(GameState.Start);
+    }
+    
+    private void Player_OnDeath(object sender, EventArgs e)
+    {
+        GameStateManager.Instance.ChangeState(GameState.GameOver);
     }
 
     public Vector2 FindSpawnPosition(int id)
@@ -140,25 +152,31 @@ namespace GameDevProjectAugustus
         if (GameStateManager.Instance.CurrentState == GameState.Playing)
         {
             KeyboardState keystate = Keyboard.GetState();
-        
-            // Debug: Check if key press is detected
-            if (keystate.IsKeyDown(Keys.D9))
+
+            // Update damage cooldown timer
+            _damageCooldownTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+            // Check if the "P" key is pressed and cooldown has elapsed
+            if (keystate.IsKeyDown(Keys.P) && _damageCooldownTimer >= _damageCooldown)
             {
-                Console.WriteLine("Game Over triggered by pressing 9");
-                GameStateManager.Instance.ChangeState(GameState.GameOver);
-                return; // Skip further updates to immediately show the game over screen
+                _damageCooldownTimer = 0f; // Reset timer
+
+                // Apply 1 damage to the player
+                if (_playerController.IsAlive) // Ensure the player is alive before applying damage
+                {
+                    _playerController.TakeDamage(1);
+                }
             }
 
             _playerController.Update(gameTime, keystate, _currentLevel, _tileSize);
 
             CheckForLevelTransition();
-
             UpdateCamera(); // Update camera position
         }
 
         base.Update(gameTime);
     }
-
+    
     private void CheckForLevelTransition()
     {
         if (GameStateManager.Instance.CurrentState != GameState.Playing) return;
@@ -227,14 +245,24 @@ namespace GameDevProjectAugustus
         DrawRectHollow(spriteBatch, _playerController.GetRectangle(), 2);
     }
     
+    // Game1.cs
     public void UpdateGame(GameTime gameTime)
     {
         // Handle game update logic during the Playing state
         KeyboardState keystate = Keyboard.GetState();
         _playerController.Update(gameTime, keystate, _currentLevel, _tileSize);
+    
+        // Check if the player is alive
+        if (!_playerController.IsAlive) // Assuming `IsAlive` is available in IPlayerController
+        {
+            GameStateManager.Instance.ChangeState(GameState.GameOver);
+            return;
+        }
+
         CheckForLevelTransition();
         UpdateCamera();
     }
+
     private void UpdateCamera()
     {
         Rectangle playerRect = _playerController.GetRectangle();

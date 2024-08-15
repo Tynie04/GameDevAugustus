@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using GameDevProjectAugustus.Classes;
 using GameDevProjectAugustus.Interfaces;
 using Microsoft.Xna.Framework;
 
@@ -10,10 +11,10 @@ public class CollisionManager : ICollisionManager
         Rectangle previousRect = sprite.GetRectangle();
 
         // Move sprite based on velocity and handle collisions
-        sprite.rect.X += (int)sprite.velocity.X;
+        sprite.Rect.X += (int)sprite.Velocity.X;
         HandleHorizontalCollisions(sprite, level, tileSize);
 
-        sprite.rect.Y += (int)sprite.velocity.Y;
+        sprite.Rect.Y += (int)sprite.Velocity.Y;
         HandleVerticalCollisions(sprite, level, tileSize);
 
         // Ensure the sprite's rectangle is constrained within bounds after collisions
@@ -33,7 +34,7 @@ public class CollisionManager : ICollisionManager
 
     private static void HandleLayerCollisions(Sprite sprite, Dictionary<Vector2, int> layer, int tileSize, bool horizontal)
     {
-        List<KeyValuePair<Rectangle, int>> intersectingTiles = GetIntersectingTiles(sprite.rect, tileSize, layer);
+        List<KeyValuePair<Rectangle, int>> intersectingTiles = GetIntersectingTiles(sprite.Rect, tileSize, layer);
         foreach (var tile in intersectingTiles)
         {
             if (tile.Value == 3)
@@ -41,32 +42,32 @@ public class CollisionManager : ICollisionManager
                 continue; // Skip the tile if its value is 3
             }
 
-            if (sprite.rect.Intersects(tile.Key))
+            if (sprite.Rect.Intersects(tile.Key))
             {
                 if (horizontal)
                 {
-                    if (sprite.velocity.X > 0) // Moving right
+                    if (sprite.Velocity.X > 0) // Moving right
                     {
-                        sprite.rect.X = tile.Key.Left - sprite.rect.Width;
+                        sprite.Rect.X = tile.Key.Left - sprite.Rect.Width;
                     }
-                    else if (sprite.velocity.X < 0) // Moving left
+                    else if (sprite.Velocity.X < 0) // Moving left
                     {
-                        sprite.rect.X = tile.Key.Right;
+                        sprite.Rect.X = tile.Key.Right;
                     }
-                    sprite.velocity.X = 0;
+                    sprite.Velocity.X = 0;
                 }
                 else
                 {
-                    if (sprite.velocity.Y > 0) // Moving down
+                    if (sprite.Velocity.Y > 0) // Moving down
                     {
-                        sprite.rect.Y = tile.Key.Top - sprite.rect.Height;
-                        sprite.isGrounded = true;
+                        sprite.Rect.Y = tile.Key.Top - sprite.Rect.Height;
+                        sprite.IsGrounded = true;
                     }
-                    else if (sprite.velocity.Y < 0) // Moving up
+                    else if (sprite.Velocity.Y < 0) // Moving up
                     {
-                        sprite.rect.Y = tile.Key.Bottom;
+                        sprite.Rect.Y = tile.Key.Bottom;
                     }
-                    sprite.velocity.Y = 0;
+                    sprite.Velocity.Y = 0;
                 }
             }
         }
