@@ -13,7 +13,8 @@ namespace GameDevProjectAugustus.Classes
             float speed,
             ICollisionManager collisionManager,
             int tileSize,
-            IPlayerController playerController) // Added parameter
+            IPlayerController playerController,
+            IHealth health) // Added parameter
         {
             return new WalkerEnemy(
                 spriteSheet,
@@ -21,7 +22,8 @@ namespace GameDevProjectAugustus.Classes
                 speed,
                 collisionManager,
                 tileSize,
-                playerController // Pass the player controller
+                playerController,
+                health // Pass the health
             );
         }
     }

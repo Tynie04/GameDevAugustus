@@ -44,6 +44,8 @@ namespace GameDevProjectAugustus.Managers
                     {
                         playerSprite.ResetHealth();
                     }
+                    _game.ClearEnemies();
+
                     break;
 
                 case GameState.Playing:

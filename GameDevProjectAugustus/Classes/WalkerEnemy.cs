@@ -21,13 +21,17 @@ public class WalkerEnemy : IEnemy
     private float _idleTimer;
     private bool _isIdling;
     private bool _isAttacking = false;
+    private IHealth _health;
 
-    public WalkerEnemy(Texture2D spriteSheet, Rectangle spawnRect, float speed, ICollisionManager collisionManager, int tileSize, IPlayerController playerController)
+    public bool IsAlive => _health.IsAlive;
+
+    public WalkerEnemy(Texture2D spriteSheet, Rectangle spawnRect, float speed, ICollisionManager collisionManager, int tileSize, IPlayerController playerController, IHealth health)
     {
         _speed = speed;
         _collisionManager = collisionManager;
         _tileSize = tileSize;
         _playerController = playerController;
+        _health = health;
 
         int frameWidth = 54;
         int frameHeight = 35;
@@ -51,8 +55,11 @@ public class WalkerEnemy : IEnemy
 
     public void Update(GameTime gameTime)
     {
-        // Update the animation based on current state
-        _animations[_currentState].Update(gameTime);
+        if (_currentState == State.Death && _animations[State.Death].IsComplete)
+        {
+            // Death animation complete; walker should not do anything further
+            return;
+        }
 
         if (_isIdling)
         {
@@ -70,6 +77,9 @@ public class WalkerEnemy : IEnemy
             Move(gameTime);
             CheckForPlayerCollision();
         }
+
+        // Update the animation based on current state
+        _animations[_currentState].Update(gameTime);
     }
 
     private void CheckForPlayerCollision()
@@ -81,40 +91,42 @@ public class WalkerEnemy : IEnemy
         }
 
         var playerRect = _playerController.GetRectangle();
+        var playerVelocity = _playerController.GetVelocity();
 
-        if (CheckCollision(playerRect))
-        {
-            if (!_isAttacking)
-            {
-                _isAttacking = true;
-                _currentState = State.Attack;
-                _playerController.TakeDamage(1);
-            }
-        }
-        else
-        {
-            _isAttacking = false;
-            if (!_isIdling && _currentState != State.Walk)
-            {
-                _currentState = State.Walk;
-            }
-        }
-    }
-
-    private bool CheckCollision(Rectangle playerRect)
-    {
         var enemyRect = new Rectangle((int)_position.X, (int)_position.Y, 54, 35);
-        return enemyRect.Intersects(playerRect);
-    }
+        var isColliding = enemyRect.Intersects(playerRect);
 
-    public void Draw(SpriteBatch spriteBatch, Vector2 camera)
-    {
-        var spriteEffects = _movingRight ? SpriteEffects.None : SpriteEffects.FlipHorizontally;
-        _animations[_currentState].Draw(spriteBatch, _position - camera, spriteEffects);
+        if (isColliding)
+        {
+            // Calculate overlap to determine if the player is landing on top
+            bool isPlayerOnTop = playerRect.Bottom <= _position.Y + 10 && playerRect.Bottom > _position.Y && playerVelocity.Y > 0;
+
+            if (isPlayerOnTop)
+            {
+                // Player landed on the walker
+                if (!_health.IsAlive)
+                {
+                    return;
+                }
+
+                // Walker takes damage, play hurt animation
+                TakeDamage(1); // Damage the walker
+            }
+            else if (!_isAttacking)
+            {
+                // Player touched from the side
+                if (_health.IsAlive)
+                {
+                    _playerController.TakeDamage(1); // Damage the player
+                }
+            }
+        }
     }
 
     private void Move(GameTime gameTime)
     {
+        if (_currentState == State.Death) return; // Do not move if dead
+
         float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
         float movementAmount = _speed * deltaTime;
 
@@ -149,5 +161,36 @@ public class WalkerEnemy : IEnemy
     {
         _isIdling = true;
         _currentState = State.Idle;
+    }
+    
+    private void TakeDamage(int amount)
+    {
+        if (!_health.IsAlive) 
+        {
+            System.Diagnostics.Debug.WriteLine("Walker already dead, damage ignored.");
+            return;
+        }
+
+        // Subtract health
+        _health.TakeDamage(amount);
+
+        if (!_health.IsAlive)
+        {
+            _currentState = State.Death;
+            _movingRight = false;
+            _isIdling = false;
+            System.Diagnostics.Debug.WriteLine("Walker died.");
+        }
+        else
+        {
+            _currentState = State.Hurt;
+            System.Diagnostics.Debug.WriteLine("Walker took damage.");
+        }
+    }
+
+    public void Draw(SpriteBatch spriteBatch, Vector2 camera)
+    {
+        var spriteEffects = _movingRight ? SpriteEffects.None : SpriteEffects.FlipHorizontally;
+        _animations[_currentState].Draw(spriteBatch, _position - camera, spriteEffects);
     }
 }

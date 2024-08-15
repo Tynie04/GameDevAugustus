@@ -143,6 +143,8 @@ public class Game1 : Game
     {
         Console.WriteLine($"Loading level: {levelName}");
 
+        ClearEnemies();
+        
         _currentLevel = _levelLoader.LoadLevel(levelName);
         if (_currentLevel == null)
         {
@@ -301,7 +303,10 @@ public class Game1 : Game
         _camera.X = Math.Min(_currentLevel.Width * _tileSize - _graphics.PreferredBackBufferWidth, _camera.X);
         _camera.Y = Math.Min(_currentLevel.Height * _tileSize - _graphics.PreferredBackBufferHeight, _camera.Y);
     }
-
+    public void ClearEnemies()
+    {
+        _enemies.Clear();
+    }
     private void SpawnWalkerEnemies()
     {
         Console.WriteLine("Spawning WalkerEnemies...");
@@ -324,14 +329,16 @@ public class Game1 : Game
 
                 if (addedPositions.Add(spawnTilePosition))
                 {
-                    var walkerEnemy = new WalkerEnemy(
+                    var walkerEnemy = EnemyFactory.CreateWalkerEnemy(
                         enemySpriteSheet,
                         spawnRect,
                         50, // Example speed
                         _collisionManager,
                         _tileSize,
-                        _playerController // Pass the player controller here
+                        _playerController, // Pass the player controller here
+                        new Health(1) // Create a new Health instance for each enemy
                     );
+
 
                     _enemies.Add(walkerEnemy);
                     Console.WriteLine($"Spawned WalkerEnemy at: {spawnRect.X}, {spawnRect.Y}");
@@ -339,7 +346,6 @@ public class Game1 : Game
             }
         }
     }
-
 
     private void DrawTiles(Dictionary<Vector2, int> tiles, Texture2D texture)
     {

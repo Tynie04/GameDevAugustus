@@ -35,6 +35,7 @@ public class Sprite : IPlayerController
     public int CurrentHealth => _health.CurrentHealth;
     public int MaxHealth => _health.MaxHealth;
 
+
     public event EventHandler OnDeath;
 
     public Sprite(IMovement movement, IPhysics physics, ICollisionManager collisionManager, IHealth health, Rectangle rect, int tileSize)
@@ -137,7 +138,12 @@ public class Sprite : IPlayerController
     {
         return Rect;
     }
-
+    
+    public Vector2 GetVelocity()
+    {
+        return Velocity;
+    }
+    
     public void TakeDamage(int amount)
     {
         if (_invulnerabilityTimer > 0) return; // Ignore damage during invulnerability
