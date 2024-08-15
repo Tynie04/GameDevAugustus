@@ -1,4 +1,5 @@
-﻿using GameDevProjectAugustus.Enums;
+﻿using GameDevProjectAugustus.Classes;
+using GameDevProjectAugustus.Enums;
 using GameDevProjectAugustus.Interfaces;
 using GameDevProjectAugustus.Screens;
 using Microsoft.Xna.Framework;

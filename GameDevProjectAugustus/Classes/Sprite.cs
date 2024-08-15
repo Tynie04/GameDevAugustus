@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using GameDevProjectAugustus.Classes;
 using GameDevProjectAugustus.Interfaces;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+
+namespace GameDevProjectAugustus.Classes;
 
 public class Sprite : IPlayerController
 {
@@ -71,9 +72,6 @@ public class Sprite : IPlayerController
         if (_invulnerabilityTimer > 0)
         {
             _invulnerabilityTimer -= (float)gameTime.ElapsedGameTime.TotalSeconds;
-
-            //PlayAnimation("Hurt");
-            // Handle flickering; make the flicker slower
             _isFlickering = _invulnerabilityTimer > 0 && _invulnerabilityTimer % 0.5f < 0.25f; // Flicker every 0.5 seconds
         }
         else
@@ -102,7 +100,10 @@ public class Sprite : IPlayerController
         _collisionManager.HandleCollisions(this, level, tileSize);
 
         // Switch back to idle animation if grounded
-        if (IsGrounded && Velocity.Y == 0 &&  !_isFlickering) PlayAnimation("Idle");
+        if (IsGrounded && Velocity.Y == 0 && !_isFlickering)
+        {
+            PlayAnimation("Idle");
+        }
 
         // Update animation
         _currentAnimation?.Update(gameTime);
@@ -111,10 +112,10 @@ public class Sprite : IPlayerController
         if (!_isDeathAnimationComplete && _currentAnimation?.Name == "Death" && _currentAnimation.IsComplete)
         {
             _isDeathAnimationComplete = true;
-            // Optionally, handle post-death logic here if needed
             OnDeath?.Invoke(this, EventArgs.Empty); // Trigger the death event
         }
     }
+
 
     public void Draw(SpriteBatch spriteBatch, Vector2 cameraPosition)
     {
@@ -130,6 +131,7 @@ public class Sprite : IPlayerController
             _currentAnimation.Draw(spriteBatch, new Vector2(Rect.X - cameraPosition.X, Rect.Y - cameraPosition.Y), spriteEffects);
         }
     }
+
 
     public Rectangle GetRectangle()
     {
@@ -152,6 +154,7 @@ public class Sprite : IPlayerController
             _invulnerabilityTimer = 0f; // Stop invulnerability timer for death
             _isFlickering = false; // Stop flickering on death
             _playHurtAnimation = false; // Ensure hurt animation isn't played on death
+            OnDeath?.Invoke(this, EventArgs.Empty); // Trigger the death event
         }
         else
         {
@@ -160,7 +163,6 @@ public class Sprite : IPlayerController
             _invulnerabilityTimer = 1f; // Set a shorter invulnerability period
         }
     }
-
 
     public void Heal(int amount)
     {

@@ -2,6 +2,8 @@
 using System.Linq;
 using Microsoft.Xna.Framework;
 
+namespace GameDevProjectAugustus.Classes;
+
 public class Level
 {
     public Dictionary<Vector2, int> Ground { get; }
@@ -36,5 +38,3 @@ public class Level
         Height = (int)(Ground.Keys.Max(v => v.Y) + 1);
     }
 }
-
-

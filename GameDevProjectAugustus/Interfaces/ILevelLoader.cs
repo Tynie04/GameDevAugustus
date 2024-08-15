@@ -1,4 +1,6 @@
-﻿namespace GameDevProjectAugustus.Interfaces
+﻿using GameDevProjectAugustus.Classes;
+
+namespace GameDevProjectAugustus.Interfaces
 {
     public interface ILevelLoader
     {

@@ -1,34 +1,37 @@
-﻿using GameDevProjectAugustus.Interfaces;
+﻿using GameDevProjectAugustus.Classes;
+using GameDevProjectAugustus.Interfaces;
 using Microsoft.Xna.Framework;
 
-namespace GameDevProjectAugustus.Managers;
-
-public class LevelManager : ILevelManager
+namespace GameDevProjectAugustus.Managers
 {
-    private readonly ILevelLoader _levelLoader;
-    private Level _currentLevel;
-
-    public LevelManager(ILevelLoader levelLoader)
+    public class LevelManager : ILevelManager
     {
-        _levelLoader = levelLoader;
-    }
+        private readonly ILevelLoader _levelLoader;
+        private Level _currentLevel;
 
-    public Level CurrentLevel => _currentLevel;
-
-    public void LoadLevel(string levelName)
-    {
-        _currentLevel = _levelLoader.LoadLevel(levelName);
-    }
-
-    public Vector2 FindSpawnPosition(int id)
-    {
-        foreach (var kvp in _currentLevel.Spawns)
+        public LevelManager(ILevelLoader levelLoader)
         {
-            if (kvp.Value == id)
-            {
-                return kvp.Key;
-            }
+            _levelLoader = levelLoader;
         }
-        return Vector2.Zero;
+
+        public Level CurrentLevel => _currentLevel;
+
+        public void LoadLevel(string levelName)
+        {
+            _currentLevel = _levelLoader.LoadLevel(levelName);
+        }
+
+        // Find spawn position for hero
+        public Vector2 FindSpawnPosition(int id)
+        {
+            foreach (var kvp in _currentLevel.Spawns)
+            {
+                if (kvp.Value == id)
+                {
+                    return kvp.Key;
+                }
+            }
+            return Vector2.Zero;
+        }
     }
 }

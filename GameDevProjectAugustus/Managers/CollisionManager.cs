@@ -5,6 +5,17 @@ using Microsoft.Xna.Framework;
 
 public class CollisionManager : ICollisionManager
 {
+   private static void HandleHorizontalCollisions(Sprite sprite, Level level, int tileSize)
+    {
+        // Check collisions with ground, platforms, and any other layer you want to collide with
+        HandleLayerCollisions(sprite, level.Collisions, tileSize, horizontal: true);
+    }
+
+    private static void HandleVerticalCollisions(Sprite sprite, Level level, int tileSize)
+    {
+        HandleLayerCollisions(sprite, level.Collisions, tileSize, horizontal: false);
+    }
+
     public void HandleCollisions(Sprite sprite, Level level, int tileSize)
     {
         // Save the previous rectangle position to check for movement
@@ -18,32 +29,26 @@ public class CollisionManager : ICollisionManager
         HandleVerticalCollisions(sprite, level, tileSize);
 
         // Ensure the sprite's rectangle is constrained within bounds after collisions
-        // Example: Clamp sprite position to level bounds if needed
+        // Example: Clamp sprite position to level bounds...
     }
 
-    private static void HandleHorizontalCollisions(Sprite sprite, Level level, int tileSize)
-    {
-        // Check collisions with ground, platforms, and any other layer you want to collide with
-        HandleLayerCollisions(sprite, level.Collisions, tileSize, horizontal: true);
-    }
 
-    private static void HandleVerticalCollisions(Sprite sprite, Level level, int tileSize)
+private static void HandleLayerCollisions(Sprite sprite, Dictionary<Vector2, int> layer, int tileSize, bool horizontal)
+{
+    List<KeyValuePair<Rectangle, int>> intersectingTiles = GetIntersectingTiles(sprite.Rect, tileSize, layer);
+    foreach (var tile in intersectingTiles)
     {
-        HandleLayerCollisions(sprite, level.Collisions, tileSize, horizontal: false);
-    }
-
-    private static void HandleLayerCollisions(Sprite sprite, Dictionary<Vector2, int> layer, int tileSize, bool horizontal)
-    {
-        List<KeyValuePair<Rectangle, int>> intersectingTiles = GetIntersectingTiles(sprite.Rect, tileSize, layer);
-        foreach (var tile in intersectingTiles)
+        if (tile.Value == 3)
         {
-            if (tile.Value == 3)
-            {
-                continue; // Skip the tile if its value is 3
-            }
+            continue; // Skip the tile if its value is 3
+        }
 
-            if (sprite.Rect.Intersects(tile.Key))
-            {
+        if (sprite.Rect.Intersects(tile.Key))
+        {
+           
+                if (tile.Value == 4)
+                    continue;
+
                 if (horizontal)
                 {
                     if (sprite.Velocity.X > 0) // Moving right
@@ -69,9 +74,10 @@ public class CollisionManager : ICollisionManager
                     }
                     sprite.Velocity.Y = 0;
                 }
-            }
         }
     }
+}
+
 
     private static List<KeyValuePair<Rectangle, int>> GetIntersectingTiles(Rectangle target, int tileSize, Dictionary<Vector2, int> layer)
     {
