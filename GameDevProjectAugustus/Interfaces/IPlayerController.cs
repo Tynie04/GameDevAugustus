@@ -22,5 +22,7 @@ namespace GameDevProjectAugustus.Interfaces
         // To access health-related data
         int CurrentHealth { get; }
         int MaxHealth { get; }
+        bool IsInvulnerable { get; }
+
     }
 }

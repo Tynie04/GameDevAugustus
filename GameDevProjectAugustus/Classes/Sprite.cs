@@ -38,6 +38,8 @@ public class Sprite : IPlayerController
     public bool IsAlive => _health.IsAlive;
     public int CurrentHealth => _health.CurrentHealth;
     public int MaxHealth => _health.MaxHealth;
+    public bool IsInvulnerable => _invulnerabilityTimer > 0;
+
 
     public event EventHandler OnDeath;
 
@@ -192,7 +194,7 @@ public class Sprite : IPlayerController
         {
             Console.WriteLine("Player hurt. Playing hurt animation.");
             _playHurtAnimation = true; // Set flag to play hurt animation
-            _invulnerabilityTimer = 1f; // Set a shorter invulnerability period
+            _invulnerabilityTimer = 3.0f; // Set a shorter invulnerability period
         }
     }
 
