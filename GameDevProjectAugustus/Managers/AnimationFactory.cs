@@ -46,20 +46,34 @@ namespace GameDevProjectAugustus.Managers
         public static Animation CreateAnimationFromMultiLine(Texture2D texture, int frameWidth, int frameHeight, int startRow, int startFrame, int frameCount, double frameTime, bool isLooping = true)
         {
             var frames = new List<AnimationFrame>();
-            int columns = texture.Width / frameWidth; // Calculate the number of columns in the texture
-            int row = startRow;
-            int totalFrames = (texture.Height / frameHeight) * columns;
+            int columns = texture.Width / frameWidth; // Number of columns in the texture
+            int rows = texture.Height / frameHeight;  // Number of rows in the texture
+
+            int currentRow = startRow;
+            int frameIndex = startFrame;
 
             for (int i = 0; i < frameCount; i++)
             {
-                int frameIndex = (startFrame + i) % totalFrames;
                 int column = frameIndex % columns;
-                var frameRectangle = new Rectangle(column * frameWidth, row * frameHeight, frameWidth, frameHeight);
-
+                var frameRectangle = new Rectangle(column * frameWidth, currentRow * frameHeight, frameWidth, frameHeight);
                 frames.Add(new AnimationFrame(frameRectangle));
+
+                frameIndex++;
+
+                // Move to the next row if we exceed the number of columns
+                if (frameIndex >= columns)
+                {
+                    frameIndex = 0;
+                    currentRow++;
+                    if (currentRow >= rows) // Ensure we do not go beyond the number of rows
+                    {
+                        currentRow = startRow; // Optionally wrap around to startRow
+                    }
+                }
             }
 
             return new Animation("AnimationName", texture, frames, frameTime, isLooping); // Provide a default name
         }
+
     }
 }

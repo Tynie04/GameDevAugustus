@@ -1,9 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using GameDevProjectAugustus.Classes;
+using GameDevProjectAugustus.Interfaces;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using GameDevProjectAugustus.Interfaces;
 
-namespace GameDevProjectAugustus.Classes
+namespace GameDevProjectAugustus.Managers
 {
     public static class EnemyFactory
     {
@@ -14,17 +14,20 @@ namespace GameDevProjectAugustus.Classes
             ICollisionManager collisionManager,
             int tileSize,
             IPlayerController playerController,
-            IHealth health) // Added parameter
+            IHealth health)
         {
-            return new WalkerEnemy(
-                spriteSheet,
-                spawnRect,
-                speed,
-                collisionManager,
-                tileSize,
-                playerController,
-                health // Pass the health
-            );
+            return new WalkerEnemy(spriteSheet, spawnRect, speed, collisionManager, tileSize, playerController, health);
+        }
+
+        public static IEnemy CreateHiderEnemy(
+            Texture2D hidingTexture,
+            Texture2D explosionTexture,
+            Texture2D deathTexture,
+            Rectangle spawnRect,
+            IPlayerController playerController,
+            IHealth health)
+        {
+            return new HiderEnemy(hidingTexture, explosionTexture, deathTexture, spawnRect, playerController, health);
         }
     }
 }

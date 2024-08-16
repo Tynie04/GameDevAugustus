@@ -144,7 +144,7 @@ public class Game1 : Game
         Console.WriteLine($"Loading level: {levelName}");
 
         ClearEnemies();
-        
+    
         _currentLevel = _levelLoader.LoadLevel(levelName);
         if (_currentLevel == null)
         {
@@ -155,7 +155,9 @@ public class Game1 : Game
 
         // Spawn enemies
         SpawnWalkerEnemies();
+        SpawnHiderEnemies(); // Add this line to spawn HiderEnemies
     }
+
 
 
     protected override void Update(GameTime gameTime)
@@ -346,6 +348,43 @@ public class Game1 : Game
             }
         }
     }
+    
+    private void SpawnHiderEnemies()
+    {
+        Console.WriteLine("Spawning HiderEnemies...");
+        
+        var hidingTexture = Content.Load<Texture2D>("EggCluster");    // Ensure these are loaded
+        var explosionTexture = Content.Load<Texture2D>("Eggsplosion");
+        var deathTexture = Content.Load<Texture2D>("EggPopped");
+
+        foreach (var kvp in _currentLevel.Spawns)
+        {
+            if (kvp.Value == 3) // ID for HiderEnemies
+            {
+                var spawnTilePosition = kvp.Key;
+                var spawnRect = new Rectangle(
+                    (int)spawnTilePosition.X * _tileSize,
+                    (int)spawnTilePosition.Y * _tileSize,
+                    54, // Width of the enemy sprite
+                    35  // Height of the enemy sprite
+                );
+                
+
+                var hiderEnemy = EnemyFactory.CreateHiderEnemy(
+                    hidingTexture,
+                    explosionTexture,
+                    deathTexture,
+                    spawnRect,
+                    _playerController,   // Pass the player controller here
+                    new Health(1)        // Create a new Health instance for each enemy
+                );
+
+                _enemies.Add(hiderEnemy);
+                Console.WriteLine($"Spawned HiderEnemy at: {spawnRect.X}, {spawnRect.Y}");
+            }
+        }
+    }
+
 
     private void DrawTiles(Dictionary<Vector2, int> tiles, Texture2D texture)
     {
