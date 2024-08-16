@@ -13,6 +13,9 @@ public class HiderEnemy : IEnemy
     private IPlayerController _playerController;
     private IHealth _health;
     private float _detectionRadius;
+    private bool _hasDamagedPlayer;
+    private float _attackDuration; // Duration of the attack window
+    private float _attackTimer; // Timer for tracking the attack duration
 
     public bool IsAlive => _health.IsAlive;
 
@@ -27,24 +30,55 @@ public class HiderEnemy : IEnemy
         _animations = new Dictionary<State, IAnimation>
         {
             { State.Idle, AnimationFactory.CreateAnimationFromSingleLine(hidingTexture, hidingTexture.Width, hidingTexture.Height, 0, 1, 1.0, true) },
-            { State.Attack, AnimationFactory.CreateAnimationFromMultiLine(explosionTexture, explosionFrameWidth, explosionFrameHeight, 0, 0, 8, 0.5, false) },
+            { State.Attack, AnimationFactory.CreateAnimationFromMultiLine(explosionTexture, explosionFrameWidth, explosionFrameHeight, 0, 0, 8, 0.1, false) },
             { State.Death, AnimationFactory.CreateAnimationFromSingleLine(deathTexture, deathTexture.Width, deathTexture.Height, 0, 1, 1.0, false) }
         };
 
         _currentState = State.Idle;
         _position = new Vector2(spawnRect.X, spawnRect.Y);
         _detectionRadius = 100f; // Set the detection radius as needed
+        _hasDamagedPlayer = false;
+        _attackDuration = 0.5f; // Set duration for attack window (in seconds)
+        _attackTimer = 0f;
     }
 
     public void Update(GameTime gameTime)
     {
-        if (_currentState == State.Death && _animations[State.Death].IsComplete)
-        {
-            return;
-        }
-
-        CheckForPlayerCollision();
+        // Update animation state
         _animations[_currentState].Update(gameTime);
+
+        if (_currentState == State.Death)
+        {
+            // Check if death animation is complete
+            if (_animations[State.Death].IsComplete)
+            {
+                return;
+            }
+        }
+        else if (_currentState == State.Attack)
+        {
+            _attackTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+            // Check if the player is still in the kill zone and deal damage
+            if (_attackTimer >= _attackDuration)
+            {
+                if (!_hasDamagedPlayer)
+                {
+                    DealDamageToPlayer();
+                    _hasDamagedPlayer = true; // Ensure damage is only dealt once per attack
+                }
+            }
+
+            // Transition to death state after attack animation is complete
+            if (_animations[State.Attack].IsComplete)
+            {
+                TransitionToDeath(); // Transition to death animation
+            }
+        }
+        else
+        {
+            CheckForPlayerCollision();
+        }
     }
 
     private void CheckForPlayerCollision()
@@ -79,11 +113,21 @@ public class HiderEnemy : IEnemy
         }
     }
 
+    private void DealDamageToPlayer()
+    {
+        if (_playerController != null && _currentState == State.Attack)
+        {
+            _playerController.TakeDamage(3); // Deal 3 damage to the player
+        }
+    }
+
     public void TransitionToAttack()
     {
         if (_currentState != State.Death)
         {
             _currentState = State.Attack;
+            _hasDamagedPlayer = false; // Reset flag for the new attack
+            _attackTimer = 0f; // Reset attack timer
         }
     }
 
