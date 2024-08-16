@@ -242,12 +242,13 @@ public class Game1 : Game
     public void DrawGame(SpriteBatch spriteBatch)
     {
         // Draw level tiles
-        DrawTiles(_currentLevel.Collisions, _hitboxTexture);
         DrawTiles(_currentLevel.Water, _waterTexture);
         DrawTiles(_currentLevel.Props, _propsTexture);
         DrawTiles(_currentLevel.Ground, _terrainTexture);
         DrawTiles(_currentLevel.Platforms, _terrainTexture);
-        DrawTiles(_currentLevel.Spawns, _spawnsTexture);
+
+        // Draw only spawn tiles with ID 0
+        DrawFilteredTiles(_currentLevel.Spawns, _spawnsTexture, id => id == 0);
 
         // Draw enemies
         foreach (var enemy in _enemies) enemy.Draw(spriteBatch, _camera);
@@ -261,6 +262,7 @@ public class Game1 : Game
         // Draw player collision rectangle for debugging
         DrawRectHollow(spriteBatch, PlayerController.GetRectangle(), 2);
     }
+
 
     private void DrawHealth(SpriteBatch spriteBatch)
     {
@@ -411,6 +413,35 @@ public class Game1 : Game
             );
 
             _spriteBatch.Draw(texture, destinationRect, sourceRect, Color.White);
+        }
+    }
+    private void DrawFilteredTiles(Dictionary<Vector2, int> tiles, Texture2D texture, Func<int, bool> filter)
+    {
+        var displayTileSize = _tileSize;
+
+        foreach (var kvp in tiles)
+        {
+            var position = kvp.Key;
+            var tileValue = kvp.Value;
+
+            if (filter(tileValue))
+            {
+                var destinationRect = new Rectangle(
+                    (int)(position.X * displayTileSize - _camera.X),
+                    (int)(position.Y * displayTileSize - _camera.Y),
+                    displayTileSize,
+                    displayTileSize
+                );
+
+                var sourceRect = new Rectangle(
+                    tileValue % 20 * displayTileSize,
+                    tileValue / 20 * displayTileSize,
+                    displayTileSize,
+                    displayTileSize
+                );
+
+                _spriteBatch.Draw(texture, destinationRect, sourceRect, Color.White);
+            }
         }
     }
 
