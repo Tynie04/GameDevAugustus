@@ -116,7 +116,7 @@ public class HiderEnemy : IEnemy
     {
         if (_playerController != null && _currentState == State.Attack)
         {
-            _playerController.TakeDamage(3); // Deal 3 damage to the player
+            _playerController.TakeDamage(2); // Deal 2 damage to the player
         }
     }
 

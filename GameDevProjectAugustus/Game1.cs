@@ -41,7 +41,10 @@ public class Game1 : Game
     private string _currentLevelName = "level1";
 
     private List<IEnemy> _enemies;
-    
+    private Texture2D _potionTexture;
+    private List<HealthPotion> _potions;
+
+
 
     public Game1()
     {
@@ -93,6 +96,9 @@ public class Game1 : Game
     // Load heart textures
     _fullHeartTexture = Content.Load<Texture2D>("Heart Stage 1");
     _emptyHeartTexture = Content.Load<Texture2D>("Heart Stage 5");
+    
+    _potionTexture = Content.Load<Texture2D>("Health potion"); // Ensure you have a HealthPotion texture
+
 
     // Create player and animations
     var heroTexture = Content.Load<Texture2D>("Mushroom");
@@ -145,7 +151,6 @@ public class Game1 : Game
         Console.WriteLine($"Loading level: {levelName}");
 
         ClearEnemies();
-    
         _currentLevel = _levelLoader.LoadLevel(levelName);
         if (_currentLevel == null)
         {
@@ -154,12 +159,36 @@ public class Game1 : Game
 
         _currentLevelName = levelName;
 
+        // Load potions
+        SpawnHealthPotions();
+
         // Spawn enemies
         SpawnWalkerEnemies();
         SpawnHiderEnemies(); // Add this line to spawn HiderEnemies
     }
 
+    private void SpawnHealthPotions()
+    {
+        _potions = new List<HealthPotion>();
 
+        foreach (var kvp in _currentLevel.Spawns)
+        {
+            if (kvp.Value == 4) // ID for HealthPotions
+            {
+                var spawnTilePosition = kvp.Key;
+                var spawnRect = new Rectangle(
+                    (int)spawnTilePosition.X * _tileSize,
+                    (int)spawnTilePosition.Y * _tileSize,
+                    38, // Width of the potion sprite
+                    38  // Height of the potion sprite
+                );
+
+                var potion = new HealthPotion(_potionTexture, spawnRect);
+                _potions.Add(potion);
+                Console.WriteLine($"Spawned HealthPotion at: {spawnRect.X}, {spawnRect.Y}");
+            }
+        }
+    }
 
     protected override void Update(GameTime gameTime)
     {
@@ -188,6 +217,12 @@ public class Game1 : Game
 
             // Update enemies
             foreach (var enemy in _enemies) enemy.Update(gameTime);
+
+            // Update potions
+            foreach (var potion in _potions)
+            {
+                potion.Update((Sprite)PlayerController, gameTime);
+            }
 
             CheckForLevelTransition();
             UpdateCamera();
@@ -253,6 +288,12 @@ public class Game1 : Game
         // Draw enemies
         foreach (var enemy in _enemies) enemy.Draw(spriteBatch, _camera);
 
+        // Draw potions
+        foreach (var potion in _potions)
+        {
+            potion.Draw(spriteBatch, _camera);
+        }
+
         // Draw player
         PlayerController.Draw(spriteBatch, _camera);
 
@@ -262,7 +303,6 @@ public class Game1 : Game
         // Draw player collision rectangle for debugging
         DrawRectHollow(spriteBatch, PlayerController.GetRectangle(), 2);
     }
-
 
     private void DrawHealth(SpriteBatch spriteBatch)
     {
