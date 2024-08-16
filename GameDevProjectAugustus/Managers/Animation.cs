@@ -1,7 +1,10 @@
-﻿using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using GameDevProjectAugustus.Interfaces;
+using GameDevProjectAugustus.UtilClasses;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+
+namespace GameDevProjectAugustus.Managers;
 
 public class Animation : IAnimation
 {

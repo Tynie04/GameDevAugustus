@@ -1,25 +1,26 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
 using GameDevProjectAugustus.Enums;
 using GameDevProjectAugustus.Interfaces;
 using GameDevProjectAugustus.Managers;
-using GameDevProjectAugustus.States;
 using GameDevProjectAugustus.WalkerStates;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
+namespace GameDevProjectAugustus.Classes;
+
 public class WalkerEnemy : IEnemy
 {
     private IWalkerState _currentState;
-    private Dictionary<State, IAnimation> _animations;
+    private readonly Dictionary<State, IAnimation> _animations;
     private bool _movingRight;
-    private float _speed;
-    private Vector2 _startPosition;
+    private readonly float _speed;
+    private readonly Vector2 _startPosition;
     private Vector2 _position;
     private ICollisionManager _collisionManager;
-    private IPlayerController _playerController;
-    private int _tileSize;
-    private int _maxMovementRangeInPixels;
-    private IHealth _health;
+    private readonly IPlayerController _playerController;
+    private readonly int _maxMovementRangeInPixels;
+    private readonly IHealth _health;
     private bool _isIdling;
 
     public bool IsAlive => _health.IsAlive;
@@ -28,7 +29,6 @@ public class WalkerEnemy : IEnemy
     {
         _speed = speed;
         _collisionManager = collisionManager;
-        _tileSize = tileSize;
         _playerController = playerController;
         _health = health;
 
@@ -37,8 +37,8 @@ public class WalkerEnemy : IEnemy
 
         _animations = new Dictionary<State, IAnimation>
         {
-            { State.Idle, AnimationFactory.CreateAnimationFromMultiLine(spriteSheet, frameWidth, frameHeight, 0, 0, 3, 0.2, true) },
-            { State.Walk, AnimationFactory.CreateAnimationFromMultiLine(spriteSheet, frameWidth, frameHeight, 1, 0, 8, 0.2, true) },
+            { State.Idle, AnimationFactory.CreateAnimationFromMultiLine(spriteSheet, frameWidth, frameHeight, 0, 0, 3, 0.2) },
+            { State.Walk, AnimationFactory.CreateAnimationFromMultiLine(spriteSheet, frameWidth, frameHeight, 1, 0, 8, 0.2) },
             { State.Attack, AnimationFactory.CreateAnimationFromMultiLine(spriteSheet, frameWidth, frameHeight, 2, 0, 7, 0.2, false) },
             { State.Hurt, AnimationFactory.CreateAnimationFromMultiLine(spriteSheet, frameWidth, frameHeight, 3, 0, 3, 0.15, false) },
             { State.Death, AnimationFactory.CreateAnimationFromMultiLine(spriteSheet, frameWidth, frameHeight, 4, 0, 9, 0.1, false) }
@@ -49,7 +49,7 @@ public class WalkerEnemy : IEnemy
         _movingRight = true;
         _isIdling = false;
 
-        _maxMovementRangeInPixels = _tileSize * 2;
+        _maxMovementRangeInPixels = tileSize * 2;
 
         TransitionToState(new WalkingState());
     }
@@ -97,7 +97,7 @@ public class WalkerEnemy : IEnemy
     {
         if (_playerController == null)
         {
-            System.Diagnostics.Debug.WriteLine("PlayerController is null in WalkerEnemy.");
+            Debug.WriteLine("PlayerController is null in WalkerEnemy.");
             return;
         }
 
@@ -237,10 +237,5 @@ public class WalkerEnemy : IEnemy
             // Transition to HurtState only if not already in it
             TransitionToState(new HurtState());
         }
-    }
-
-    public void Heal(int amount)
-    {
-        _health.Heal(amount);
     }
 }

@@ -1,6 +1,6 @@
 ﻿using GameDevProjectAugustus.Interfaces;
 
-namespace GameDevProjectAugustus.Classes
+namespace GameDevProjectAugustus.UtilClasses
 {
     public class Health : IHealth
     {

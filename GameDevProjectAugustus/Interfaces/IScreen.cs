@@ -1,10 +1,9 @@
-﻿using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
+﻿using Microsoft.Xna.Framework.Graphics;
 
 namespace GameDevProjectAugustus.Interfaces;
 
 public interface IScreen
 {
-    void Update(GameTime gameTime);
+    void Update();
     void Draw(SpriteBatch spriteBatch);
 }

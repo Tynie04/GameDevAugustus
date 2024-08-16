@@ -1,9 +1,12 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
 using GameDevProjectAugustus.Enums;
 using GameDevProjectAugustus.Interfaces;
 using GameDevProjectAugustus.Managers;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+
+namespace GameDevProjectAugustus.Classes;
 
 public class HiderEnemy : IEnemy
 {
@@ -14,11 +17,9 @@ public class HiderEnemy : IEnemy
     private IHealth _health;
     private float _detectionRadius;
     private bool _hasDamagedPlayer;
-    private float _attackDuration; // Duration of the attack window
+    private readonly float _attackDuration; // Duration of the attack window
     private float _attackTimer; // Timer for tracking the attack duration
-
-    public bool IsAlive => _health.IsAlive;
-
+    
     public HiderEnemy(Texture2D hidingTexture, Texture2D explosionTexture, Texture2D deathTexture, Rectangle spawnRect, IPlayerController playerController, IHealth health)
     {
         _playerController = playerController;
@@ -29,7 +30,7 @@ public class HiderEnemy : IEnemy
 
         _animations = new Dictionary<State, IAnimation>
         {
-            { State.Idle, AnimationFactory.CreateAnimationFromSingleLine(hidingTexture, hidingTexture.Width, hidingTexture.Height, 0, 1, 1.0, true) },
+            { State.Idle, AnimationFactory.CreateAnimationFromSingleLine(hidingTexture, hidingTexture.Width, hidingTexture.Height, 0, 1, 1.0) },
             { State.Attack, AnimationFactory.CreateAnimationFromMultiLine(explosionTexture, explosionFrameWidth, explosionFrameHeight, 0, 0, 8, 0.1, false) },
             { State.Death, AnimationFactory.CreateAnimationFromSingleLine(deathTexture, deathTexture.Width, deathTexture.Height, 0, 1, 1.0, false) }
         };
@@ -47,37 +48,35 @@ public class HiderEnemy : IEnemy
         // Update animation state
         _animations[_currentState].Update(gameTime);
 
-        if (_currentState == State.Death)
+        switch (_currentState)
         {
-            // Check if death animation is complete
-            if (_animations[State.Death].IsComplete)
+            case State.Death:
+                break;
+            case State.Attack:
             {
-                return;
-            }
-        }
-        else if (_currentState == State.Attack)
-        {
-            _attackTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
+                _attackTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
 
-            // Check if the player is still in the kill zone and deal damage
-            if (_attackTimer >= _attackDuration)
-            {
-                if (!_hasDamagedPlayer)
+                // Check if the player is still in the kill zone and deal damage
+                if (_attackTimer >= _attackDuration)
                 {
-                    DealDamageToPlayer();
-                    _hasDamagedPlayer = true; // Ensure damage is only dealt once per attack
+                    if (!_hasDamagedPlayer)
+                    {
+                        DealDamageToPlayer();
+                        _hasDamagedPlayer = true; // Ensure damage is only dealt once per attack
+                    }
                 }
-            }
 
-            // Transition to death state after attack animation is complete
-            if (_animations[State.Attack].IsComplete)
-            {
-                TransitionToDeath(); // Transition to death animation
+                // Transition to death state after attack animation is complete
+                if (_animations[State.Attack].IsComplete)
+                {
+                    TransitionToDeath(); // Transition to death animation
+                }
+
+                break;
             }
-        }
-        else
-        {
-            CheckForPlayerCollision();
+            default:
+                CheckForPlayerCollision();
+                break;
         }
     }
 
@@ -85,7 +84,7 @@ public class HiderEnemy : IEnemy
     {
         if (_playerController == null)
         {
-            System.Diagnostics.Debug.WriteLine("PlayerController is null in HiderEnemy.");
+            Debug.WriteLine("PlayerController is null in HiderEnemy.");
             return;
         }
 
@@ -133,10 +132,9 @@ public class HiderEnemy : IEnemy
 
     public void TransitionToDeath()
     {
-        if (_currentState != State.Death)
-        {
+        
             _currentState = State.Death;
-        }
+        
     }
 
     public void Draw(SpriteBatch spriteBatch, Vector2 camera)

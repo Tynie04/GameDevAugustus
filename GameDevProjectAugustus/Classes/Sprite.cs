@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using GameDevProjectAugustus.Classes;
 using GameDevProjectAugustus.Interfaces;
+using GameDevProjectAugustus.UtilClasses;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+
+namespace GameDevProjectAugustus.Classes;
 
 public class Sprite : IPlayerController
 {
@@ -206,7 +208,7 @@ public class Sprite : IPlayerController
 
     public void ResetHealth()
     {
-        if (this._health is Health health)
+        if (_health is Health health)
         {
             health.Heal(5);
         }

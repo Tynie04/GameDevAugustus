@@ -1,9 +1,9 @@
-﻿using GameDevProjectAugustus.Enums;
+﻿using GameDevProjectAugustus.Classes;
+using GameDevProjectAugustus.Enums;
 using GameDevProjectAugustus.Interfaces;
-using GameDevProjectAugustus.WalkerStates;
 using Microsoft.Xna.Framework;
 
-namespace GameDevProjectAugustus.States
+namespace GameDevProjectAugustus.WalkerStates
 {
     public class IdleState : IWalkerState
     {

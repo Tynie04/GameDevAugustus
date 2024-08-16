@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using GameDevProjectAugustus.Classes;
+using Microsoft.Xna.Framework;
 
 namespace GameDevProjectAugustus.Interfaces
 {
@@ -6,6 +7,5 @@ namespace GameDevProjectAugustus.Interfaces
     {
         void EnterState(WalkerEnemy walker);
         void Update(WalkerEnemy walker, GameTime gameTime);
-        void OnPlayerCollision(WalkerEnemy walker);
     }
 }

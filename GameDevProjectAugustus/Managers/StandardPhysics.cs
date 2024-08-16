@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using GameDevProjectAugustus.Interfaces;
+using Microsoft.Xna.Framework;
 
 namespace GameDevProjectAugustus.Managers;
 

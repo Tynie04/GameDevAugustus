@@ -40,7 +40,7 @@ namespace GameDevProjectAugustus.Managers
                 case GameState.Start:
                     _currentScreen = new StartScreen(_graphics, _font);
                     // Reset the player's health and flickering state when starting the game
-                    if (_game._playerController is Sprite playerSprite)
+                    if (_game.PlayerController is Sprite playerSprite)
                     {
                         playerSprite.ResetHealth();
                     }
@@ -51,7 +51,7 @@ namespace GameDevProjectAugustus.Managers
                 case GameState.Playing:
                     _game.LoadLevel("level1");
                     Vector2 spawnPosition = _game.FindSpawnPosition(2);
-                    _game._playerController.Initialize(spawnPosition);
+                    _game.PlayerController.Initialize(spawnPosition);
                     break;
 
                 case GameState.GameOver:
@@ -66,7 +66,7 @@ namespace GameDevProjectAugustus.Managers
 
         public void Update(GameTime gameTime)
         {
-            _currentScreen?.Update(gameTime);
+            _currentScreen?.Update();
             // If Playing, update game logic
             if (_currentState == GameState.Playing)
             {

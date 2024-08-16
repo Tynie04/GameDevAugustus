@@ -1,6 +1,6 @@
-﻿using GameDevProjectAugustus.Enums;
+﻿using GameDevProjectAugustus.Classes;
+using GameDevProjectAugustus.Enums;
 using GameDevProjectAugustus.Interfaces;
-using GameDevProjectAugustus.States;
 using Microsoft.Xna.Framework;
 
 namespace GameDevProjectAugustus.WalkerStates

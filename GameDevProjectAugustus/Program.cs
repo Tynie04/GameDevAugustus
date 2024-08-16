@@ -1,2 +1,4 @@
-﻿using var game = new GameDevProjectAugustus.Game1();
+﻿using GameDevProjectAugustus;
+
+using var game = new Game1();
 game.Run();

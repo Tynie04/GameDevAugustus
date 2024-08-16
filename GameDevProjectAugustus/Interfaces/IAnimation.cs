@@ -1,6 +1,8 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
+namespace GameDevProjectAugustus.Interfaces;
+
 public interface IAnimation
 {
     string Name { get; }

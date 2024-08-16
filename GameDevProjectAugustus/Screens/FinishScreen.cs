@@ -18,7 +18,7 @@ public class FinishScreen : IScreen
         _font = font;
     }
 
-    public void Update(GameTime gameTime)
+    public void Update()
     {
         if (Keyboard.GetState().IsKeyDown(Keys.Enter))
         {

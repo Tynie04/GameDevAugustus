@@ -22,7 +22,7 @@ public class CollisionManager : ICollisionManager
     public void HandleCollisions(Sprite sprite, Level level, int tileSize)
     {
         // Save the previous rectangle position to check for movement
-        Rectangle previousRect = sprite.GetRectangle();
+        sprite.GetRectangle();
 
         // Move sprite based on velocity and handle collisions
         sprite.Rect.X += (int)sprite.Velocity.X;

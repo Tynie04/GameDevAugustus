@@ -4,6 +4,7 @@ using GameDevProjectAugustus.Classes;
 using GameDevProjectAugustus.Enums;
 using GameDevProjectAugustus.Interfaces;
 using GameDevProjectAugustus.Managers;
+using GameDevProjectAugustus.UtilClasses;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -29,7 +30,7 @@ public class Game1 : Game
     private Texture2D _emptyHeartTexture;
 
     private Vector2 _camera;
-    public IPlayerController _playerController;
+    public IPlayerController PlayerController;
     private ICollisionManager _collisionManager;
     private IPhysics _physics;
     private readonly int _tileSize = 16; // Make sure this matches your CSV data
@@ -118,7 +119,7 @@ public class Game1 : Game
     player.AddAnimation("Death", deathAnimation);
     player.PlayAnimation("Idle");
 
-    _playerController = player;
+    PlayerController = player;
     player.OnDeath += Player_OnDeath;
 
     // Set the game state to Start
@@ -180,10 +181,10 @@ public class Game1 : Game
             {
                 _damageCooldownTimer = 0f;
 
-                if (_playerController.IsAlive) _playerController.TakeDamage(1);
+                if (PlayerController.IsAlive) PlayerController.TakeDamage(1);
             }
 
-            _playerController.Update(gameTime, keystate, _currentLevel, _tileSize);
+            PlayerController.Update(gameTime, keystate, _currentLevel, _tileSize);
 
             // Update enemies
             foreach (var enemy in _enemies) enemy.Update(gameTime);
@@ -199,7 +200,7 @@ public class Game1 : Game
     {
         if (GameStateManager.Instance.CurrentState != GameState.Playing) return;
 
-        var playerRect = _playerController.GetRectangle();
+        var playerRect = PlayerController.GetRectangle();
         var playerTile = new Vector2(
             playerRect.Center.X / _tileSize,
             playerRect.Center.Y / _tileSize
@@ -220,7 +221,7 @@ public class Game1 : Game
         {
             LoadLevel("level2");
             var spawnPosition = FindSpawnPosition(2); // Find spawn position with ID 2 in the new level
-            _playerController.Initialize(spawnPosition);
+            PlayerController.Initialize(spawnPosition);
         }
         // Add more levels as needed
     }
@@ -252,13 +253,13 @@ public class Game1 : Game
         foreach (var enemy in _enemies) enemy.Draw(spriteBatch, _camera);
 
         // Draw player
-        _playerController.Draw(spriteBatch, _camera);
+        PlayerController.Draw(spriteBatch, _camera);
 
         // Draw health hearts
         DrawHealth(spriteBatch);
 
         // Draw player collision rectangle for debugging
-        DrawRectHollow(spriteBatch, _playerController.GetRectangle(), 2);
+        DrawRectHollow(spriteBatch, PlayerController.GetRectangle(), 2);
     }
 
     private void DrawHealth(SpriteBatch spriteBatch)
@@ -269,10 +270,10 @@ public class Game1 : Game
         var startX = 10;
         var startY = 10;
 
-        for (var i = 0; i < _playerController.MaxHealth; i++)
+        for (var i = 0; i < PlayerController.MaxHealth; i++)
         {
             var position = new Vector2(startX + i * (heartSize + heartSpacing), startY);
-            var texture = i < _playerController.CurrentHealth ? _fullHeartTexture : _emptyHeartTexture;
+            var texture = i < PlayerController.CurrentHealth ? _fullHeartTexture : _emptyHeartTexture;
 
             spriteBatch.Draw(texture, position, null, Color.White, 0f, Vector2.Zero, scale, SpriteEffects.None, 0f);
         }
@@ -281,9 +282,9 @@ public class Game1 : Game
     public void UpdateGame(GameTime gameTime)
     {
         var keystate = Keyboard.GetState();
-        _playerController.Update(gameTime, keystate, _currentLevel, _tileSize);
+        PlayerController.Update(gameTime, keystate, _currentLevel, _tileSize);
 
-        if (!_playerController.IsAlive)
+        if (!PlayerController.IsAlive)
         {
             GameStateManager.Instance.ChangeState(GameState.GameOver);
             return;
@@ -295,7 +296,7 @@ public class Game1 : Game
 
     private void UpdateCamera()
     {
-        var playerRect = _playerController.GetRectangle();
+        var playerRect = PlayerController.GetRectangle();
 
         _camera.X = playerRect.Center.X - _graphics.PreferredBackBufferWidth / 2;
         _camera.Y = playerRect.Center.Y - _graphics.PreferredBackBufferHeight / 2;
@@ -337,7 +338,7 @@ public class Game1 : Game
                         50, // Example speed
                         _collisionManager,
                         _tileSize,
-                        _playerController, // Pass the player controller here
+                        PlayerController, // Pass the player controller here
                         new Health(1) // Create a new Health instance for each enemy
                     );
 
@@ -375,7 +376,7 @@ public class Game1 : Game
                     explosionTexture,
                     deathTexture,
                     spawnRect,
-                    _playerController,   // Pass the player controller here
+                    PlayerController,   // Pass the player controller here
                     new Health(1)        // Create a new Health instance for each enemy
                 );
 

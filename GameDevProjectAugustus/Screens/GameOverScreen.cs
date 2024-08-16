@@ -5,6 +5,8 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
+namespace GameDevProjectAugustus.Screens;
+
 public class GameOverScreen : IScreen
 {
     private readonly GraphicsDeviceManager _graphics;
@@ -16,7 +18,7 @@ public class GameOverScreen : IScreen
         _font = font;
     }
 
-    public void Update(GameTime gameTime)
+    public void Update()
     {
         if (Keyboard.GetState().IsKeyDown(Keys.Enter))
         {
