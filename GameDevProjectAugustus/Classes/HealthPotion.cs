@@ -51,7 +51,7 @@ namespace GameDevProjectAugustus.Classes
             {
                 if (player.CurrentHealth < player.MaxHealth)
                 {
-                    player.Heal(1);
+                    player.Heal(3);
                     _isActive = false; // Potion disappears after being picked up
                 }
             }

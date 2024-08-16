@@ -243,7 +243,7 @@ public class Game1 : Game
 
         if (_currentLevel.Spawns.TryGetValue(playerTile, out var spawnId) && spawnId == 0)
         {
-            if (_currentLevelName == "level2")
+            if (_currentLevelName == "level3")
                 GameStateManager.Instance.ChangeState(GameState.Finish);
             else
                 LoadNextLevel();
@@ -252,14 +252,25 @@ public class Game1 : Game
 
     private void LoadNextLevel()
     {
+        Console.WriteLine($"Current level: {_currentLevelName}");
+
         if (_currentLevelName == "level1")
         {
             LoadLevel("level2");
             var spawnPosition = FindSpawnPosition(2); // Find spawn position with ID 2 in the new level
             PlayerController.Initialize(spawnPosition);
+            Console.WriteLine("Loaded level2.");
+        }
+        else if (_currentLevelName == "level2")
+        {
+            LoadLevel("level3");
+            var spawnPosition = FindSpawnPosition(2); // Find spawn position with ID 2 in the new level
+            PlayerController.Initialize(spawnPosition);
+            Console.WriteLine("Loaded level3.");
         }
         // Add more levels as needed
     }
+
 
     protected override void Draw(GameTime gameTime)
     {
