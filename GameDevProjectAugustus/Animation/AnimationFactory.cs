@@ -8,7 +8,7 @@ namespace GameDevProjectAugustus.Managers
     /// <summary>
     /// Factory class for creating animations.
     /// </summary>
-    public class AnimationFactory
+    public static class AnimationFactory
     {
         /// <summary>
         /// Creates an animation from a single line of frames in a texture.

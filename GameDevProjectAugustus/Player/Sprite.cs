@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using GameDevProjectAugustus.Animation.Interfaces;
 using GameDevProjectAugustus.Interfaces;
 using GameDevProjectAugustus.UtilClasses;
 using Microsoft.Xna.Framework;

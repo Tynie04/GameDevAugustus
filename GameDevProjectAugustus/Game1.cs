@@ -205,14 +205,7 @@ public class Game1 : Game
 
             // Update damage cooldown timer
             _damageCooldownTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
-
-            if (keystate.IsKeyDown(Keys.P) && _damageCooldownTimer >= _damageCooldown)
-            {
-                _damageCooldownTimer = 0f;
-
-                if (PlayerController.IsAlive) PlayerController.TakeDamage(1);
-            }
-
+            
             PlayerController.Update(gameTime, keystate, _currentLevel, _tileSize);
 
             // Update enemies
@@ -312,7 +305,7 @@ public class Game1 : Game
         DrawHealth(spriteBatch);
 
         // Draw player collision rectangle for debugging
-        DrawRectHollow(spriteBatch, PlayerController.GetRectangle(), 2);
+        // DrawRectHollow(spriteBatch, PlayerController.GetRectangle(), 2);
     }
 
     private void DrawHealth(SpriteBatch spriteBatch)
@@ -496,6 +489,9 @@ public class Game1 : Game
         }
     }
 
+    
+    // FOR DEBUGGING PURPOSES
+    // DRAWS HITBOXES AROUND OBJECTS
     public void DrawRectHollow(SpriteBatch spriteBatch, Rectangle rect, int thickness)
     {
         spriteBatch.Draw(
